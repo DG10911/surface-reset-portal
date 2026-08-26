@@ -29,6 +29,13 @@
     background:rgba(6,10,20,.6);border:1px solid var(--line);padding:7px 12px;border-radius:8px;backdrop-filter:blur(6px)}
   .rec{top:14px;left:16px}.rec .rd{width:9px;height:9px;border-radius:50%;background:#ef4444;animation:pulse 1.3s infinite}
   .hint{bottom:70px;left:16px;color:var(--muted);font-weight:600}
+  .narrator{position:absolute;left:50%;transform:translateX(-50%);bottom:72px;width:560px;max-width:72%;
+    background:rgba(8,12,24,.82);backdrop-filter:blur(10px);border:1px solid var(--line2);border-left:4px solid #38BDF8;
+    border-radius:14px;padding:12px 16px;box-shadow:0 12px 40px rgba(0,0,0,.5);transition:border-color .25s}
+  .narrator .step{display:flex;align-items:center;gap:10px;margin-bottom:3px}
+  .narrator .no{font-size:11px;font-weight:800;letter-spacing:.1em;color:#0A0E1A;background:#38BDF8;padding:3px 8px;border-radius:6px}
+  .narrator .nm{font-size:15px;font-weight:800;letter-spacing:.01em}
+  .narrator .ds{font-size:12.5px;color:var(--muted);line-height:1.45}
   .hud{position:absolute;top:14px;right:14px;width:250px;background:var(--panel);backdrop-filter:blur(10px);
     border:1px solid var(--line2);border-radius:16px;padding:15px;font-variant-numeric:tabular-nums;box-shadow:0 10px 40px rgba(0,0,0,.4)}
   .hud .timer{display:flex;align-items:baseline;gap:7px}
@@ -79,6 +86,10 @@
     <div class="loading" id="loading">LOADING 3D ENGINE…</div>
     <div class="badge rec"><span class="rd"></span> REC</div>
     <div class="badge hint">🖱️ Drag to orbit · scroll to zoom</div>
+    <div class="narrator" id="narrator">
+      <div class="step"><span class="no" id="stepNo">READY</span><span class="nm" id="stepName">Surface Reset Portal</span></div>
+      <div class="ds" id="stepDesc">Press START — a dirty used car enters the Cars24 portal. Watch all six machines clean it in one 24-second pass.</div>
+    </div>
     <div class="hud">
       <div class="timer"><span class="big" id="tSec">0.0</span><span class="max">/ 24.0 s</span></div>
       <div class="now" id="tNow">System idle</div>
@@ -121,6 +132,24 @@ const M=[
  {k:'mist',s:4,e:8,name:'Polymer mist',col:'#38BDF8'},{k:'tex',s:6,e:16,name:'Textile contact',col:'#34D399'},
  {k:'air',s:12,e:20,name:'Air-knife extract',col:'#FBBF24'},{k:'gloss',s:21,e:24,name:'Gloss + protect',col:'#F472B6'}];
 const TOTAL=24;
+const DESC={
+ scan:'AI cameras 3D-map the car and detect dirt zones — the portal cleans only what is actually dirty.',
+ ion:'An ionised-air bar neutralises static charge so dust releases from the paint before anything touches it.',
+ mist:'A fine rinseless-polymer mist encapsulates & lubricates the grime — under 500 ml of water per car.',
+ tex:'Soft foam brushes wrap the roof, both sides and the wheels at once — parallel contact is the 10× speed-up.',
+ air:'High-velocity air-knife sheets blast off the water and residue instantly — no drying tunnel needed.',
+ gloss:'A robot arm lays a thin SiO₂ gloss coat — showroom shine plus days of dirt resistance in dusty India.'
+};
+// cinematic camera keyframes {t: sec, p:[pos], g:[target]}
+const CAM=[
+ {t:-3.2,p:[20,9,22],g:[-6,1,2]},{t:0,p:[12,5.2,13],g:[0,1.1,0]},{t:5,p:[9.5,4.4,11],g:[0,1.1,0]},
+ {t:10,p:[3.5,4,12],g:[0,1.2,0]},{t:16,p:[-3,4.2,11],g:[0,1.1,0]},{t:20,p:[9,4,-7],g:[0,1.2,0]},
+ {t:23,p:[8,3.4,9],g:[0,1.1,0]},{t:26.6,p:[15,6.5,16],g:[1,1,0]}];
+function camAt(T){let a=CAM[0],b=CAM[CAM.length-1];
+ if(T<=CAM[0].t)return{p:CAM[0].p,g:CAM[0].g};if(T>=b.t)return{p:b.p,g:b.g};
+ for(let i=0;i<CAM.length-1;i++){if(T>=CAM[i].t&&T<=CAM[i+1].t){a=CAM[i];b=CAM[i+1];break;}}
+ const u=ease(clamp((T-a.t)/(b.t-a.t),0,1));
+ return{p:[lerp(a.p[0],b.p[0],u),lerp(a.p[1],b.p[1],u),lerp(a.p[2],b.p[2],u)],g:[lerp(a.g[0],b.g[0],u),lerp(a.g[1],b.g[1],u),lerp(a.g[2],b.g[2],u)]};}
 const rows=S('tlRows');
 M.forEach((m,i)=>{const r=document.createElement('div');r.className='tl-row';
   r.innerHTML=`<div class="tl-label" id="lab_${m.k}" style="color:${m.col}">${i+1} · ${m.name}</div>
@@ -152,7 +181,8 @@ function build3D(){
   controls=new THREE.OrbitControls(camera,renderer.domElement);
   controls.target.set(0,1.1,0);controls.enableDamping=true;controls.dampingFactor=0.06;
   controls.minDistance=7;controls.maxDistance=36;controls.maxPolarAngle=Math.PI*0.49;
-  controls.autoRotate=true;controls.autoRotateSpeed=0.42;
+  controls.autoRotate=false;
+  controls.addEventListener('start',()=>{cinematic=false;});
 
   scene.add(new THREE.HemisphereLight(0x9fc0ff,0x0a0f1f,0.5));
   const key=new THREE.DirectionalLight(0xffffff,1.2);key.position.set(9,15,11);key.castShadow=true;
@@ -413,7 +443,7 @@ function buildMachines(){
 
   // WHEEL-WASH spinner brushes (low, angled, at each wheel)
   G.wheelWash=[];
-  [[1.28,1],[1.28,-1],[-1.28,1],[-1.28,-1]].forEach(([x,zs])=>{const b=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.3,14),new THREE.MeshStandardMaterial({color:0x38bdf8,roughness:0.9,emissive:0x0a2b44,emissiveIntensity:0.3}));b.position.set(x,0.5,zs*1.35);b.rotation.z=Math.PI/2;b.visible=false;scene.add(b);G.wheelWash.push({b,x,zs});});
+  [[1.28,1],[1.28,-1],[-1.28,1],[-1.28,-1]].forEach(([x,zs])=>{const b=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.3,14),new THREE.MeshStandardMaterial({color:0x38bdf8,roughness:0.9,emissive:0x0a2b44,emissiveIntensity:0.3}));b.position.set(x,0.5,zs*1.25);b.rotation.z=Math.PI/2;b.visible=false;scene.add(b);G.wheelWash.push({b,x,zs});});
 }
 
 function makePoints(n,color,size){
@@ -427,12 +457,12 @@ function buildParticles(){
   [G.ion,G.mist,G.air,G.spark,G.foam].forEach(p=>p.pts.visible=false);
   G.seed=[];for(let i=0;i<240;i++)G.seed.push({a:Math.random(),b:Math.random(),c:Math.random(),d:Math.random()});}
 
-let T=-3.2,playing=false,speed=1,done=false,lastMs=performance.now();
+let T=-3.2,playing=false,speed=1,done=false,lastMs=performance.now(),cinematic=true;
 function setSpeed(s){speed=s;document.querySelectorAll('.speed button').forEach(b=>b.classList.toggle('on',+b.dataset.s===s));}
 document.querySelectorAll('.speed button').forEach(b=>b.onclick=()=>setSpeed(+b.dataset.s));
 S('go').onclick=start;function start(){if(done||T>=26)reset();playing=true;S('go').textContent='⏸ PAUSE';S('go').onclick=toggle;}
 function toggle(){playing=!playing;S('go').textContent=playing?'⏸ PAUSE':'▶ RESUME';}
-S('replay').onclick=reset;function reset(){T=-3.2;done=false;playing=true;S('go').textContent='⏸ PAUSE';S('go').onclick=toggle;}
+S('replay').onclick=reset;function reset(){T=-3.2;done=false;playing=true;cinematic=true;S('go').textContent='⏸ PAUSE';S('go').onclick=toggle;}
 
 function updatePts(P,vis,fn,opacity){if(!P)return;P.pts.visible=vis>0.02;if(vis<=0.02)return;
   for(let i=0;i<P.n;i++){const s=G.seed[i%G.seed.length];const p=fn(i,s);P.pos[i*3]=p[0];P.pos[i*3+1]=p[1];P.pos[i*3+2]=p[2];}
@@ -469,8 +499,8 @@ function update3D(){
   updatePts(G.foam,foamI,(i,s)=>[cx+lerp(-2,2,s.c),lerp(0.9,1.9,s.a),lerp(-1,1,s.d)],foamI*0.95);
 
   const texActive=tc>=6&&tc<=16.4,texIn=seg(tc,6,7.4),texOut=seg(tc,15,16.4),bob=Math.sin(T*11)*0.05;
-  if(G.roofPad){G.roofPad.visible=texActive;G.roofPad.position.y=(lerp(5.2,2.5,texIn)-texOut*2.7)+bob;G.roofPad.position.x=cx+Math.sin(T*6)*0.12;if(G.roofBrush)G.roofBrush.rotation.x+=0.3;}
-  G.sidePads.forEach(sp=>{sp.grp.visible=texActive;sp.grp.position.x=cx;sp.grp.position.z=lerp(sp.zs*3.1,sp.zs*1.18,texIn)+texOut*sp.zs*1.95;sp.roller.rotation.y+=0.3;});
+  if(G.roofPad){G.roofPad.visible=texActive;G.roofPad.position.y=(lerp(5.2,1.92,texIn)-texOut*2.7)+bob;G.roofPad.position.x=cx+Math.sin(T*6)*0.12;if(G.roofBrush)G.roofBrush.rotation.x+=0.3;}
+  G.sidePads.forEach(sp=>{sp.grp.visible=texActive;sp.grp.position.x=cx;sp.grp.position.z=lerp(sp.zs*3.1,sp.zs*1.28,texIn)+texOut*sp.zs*1.95;sp.roller.rotation.y+=0.3;});
   // wheel-wash spinners (during textile)
   if(G.wheelWash)G.wheelWash.forEach(ww=>{ww.b.visible=texActive;ww.b.position.x=cx+ww.x;ww.b.rotation.x+=0.5;});
 
@@ -493,12 +523,19 @@ function update3D(){
     S('fill_'+m.k).style.width=(seg(tc,m.s,m.e)*(m.e-m.s)/TOTAL*100)+'%';
     const ml=S('ml_'+m.k);ml.classList.toggle('on',on);const led=ml.querySelector('.led');led.style.background=on?m.col:'#243052';led.style.boxShadow=on?`0 0 8px ${m.col}`:'none';});
   let now='System idle';if(T<0)now='🚗 Vehicle entering portal…';else if(T>TOTAL)now='✅ Photo-ready — exiting portal';else if(active)now='● '+active.name+' active';S('tNow').textContent=now;
+  // narrator (step-by-step for judges)
+  const nar=S('narrator');
+  if(T<0){S('stepNo').textContent='ENTER';S('stepNo').style.background='#FFD21E';S('stepName').textContent='Dirty car enters the portal';S('stepDesc').textContent='A used car arrives from the Cars24 lot. Current manual clean by an expert takes ~4 minutes — the portal targets 24 seconds.';nar.style.borderLeftColor='#FFD21E';}
+  else if(T>TOTAL){S('stepNo').textContent='DONE';S('stepNo').style.background='#22C55E';S('stepName').textContent='Photo-ready in 24 seconds';S('stepDesc').textContent='Clean, glossy and protected — ready for the 360° photo studio. 10× faster than manual, at <500 ml water.';nar.style.borderLeftColor='#22C55E';}
+  else if(active){const idx=M.indexOf(active)+1;S('stepNo').textContent='STEP '+idx+'/6';S('stepNo').style.background=active.col;S('stepName').textContent=active.name;S('stepDesc').textContent=DESC[active.k];nar.style.borderLeftColor=active.col;}
   const ph=S('playhead');if(portalOn){ph.style.opacity=1;ph.style.left=`calc(150px + 12px + ${tc/TOTAL} * (100% - 150px - 12px - 18px))`;}else ph.style.opacity=0;
   S('tlPct').textContent=Math.round(tc/TOTAL*100)+'%';
 }
 function animate(){requestAnimationFrame(animate);const now=performance.now(),dt=(now-lastMs)/1000;lastMs=now;
   if(playing){T+=dt*speed;if(T>TOTAL+2.6){T=TOTAL+2.6;playing=false;done=true;S('go').textContent='↻ Run again';S('go').onclick=reset;}}
-  update3D();controls.update();renderer.render(scene,camera);}
+  update3D();
+  if(cinematic){const k=camAt(T);camera.position.lerp(new THREE.Vector3(k.p[0],k.p[1],k.p[2]),0.045);controls.target.lerp(new THREE.Vector3(k.g[0],k.g[1],k.g[2]),0.06);}
+  controls.update();renderer.render(scene,camera);}
 try{build3D();animate();}catch(e){S('loading').textContent='3D engine failed to load — check connection.';console.error(e);}
 </script>
 </body>

@@ -3,48 +3,46 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Cars24 · Surface Reset Portal — Live Simulation</title>
+<title>Cars24 · Surface Reset Portal — 3D Simulation</title>
 <style>
   :root{
-    --navy:#070B16; --panel:rgba(16,22,42,.72); --line:#243052; --line2:#33406a;
+    --panel:rgba(14,20,40,.68); --line:#243052; --line2:#33406a;
     --ink:#EAF0FF; --muted:#8fa0c8; --yellow:#FFD21E; --yellowD:#F5B301;
     --scan:#9fb0d6; --ion:#A78BFA; --chem:#38BDF8; --tex:#34D399; --air:#FBBF24; --gloss:#F472B6; --good:#22C55E;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
-  body{
-    background:radial-gradient(1400px 800px at 50% -12%, #17223f 0%, #0a0f1f 52%, #04060d 100%);
-    color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;
-    min-height:100%; padding:16px; display:flex; justify-content:center;
-  }
-  .app{width:1200px; max-width:100%}
-  .topbar{display:flex; align-items:center; gap:16px; padding:4px 4px 14px}
-  .logo{font-weight:900; font-size:26px}
-  .logo .c24{background:var(--yellow); color:#0A0E1A; padding:5px 11px; border-radius:9px; box-shadow:0 6px 22px rgba(255,210,30,.4)}
+  body{background:radial-gradient(1400px 800px at 50% -12%, #17223f 0%, #0a0f1f 52%, #04060d 100%);
+    color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;
+    min-height:100%;padding:16px;display:flex;justify-content:center}
+  .app{width:1200px;max-width:100%}
+  .topbar{display:flex;align-items:center;gap:16px;padding:4px 4px 14px}
+  .logo{font-weight:900;font-size:26px}
+  .logo .c24{background:var(--yellow);color:#0A0E1A;padding:5px 11px;border-radius:9px;box-shadow:0 6px 22px rgba(255,210,30,.4)}
   .divider{width:1px;height:32px;background:var(--line2)}
   .title{display:flex;flex-direction:column;line-height:1.15}
   .title b{font-size:16px}
   .title span{font-size:11.5px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase}
   .live{margin-left:auto;display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800;letter-spacing:.14em;
-        background:#151d38;border:1px solid var(--line2);padding:9px 15px;border-radius:999px}
+    background:#151d38;border:1px solid var(--line2);padding:9px 15px;border-radius:999px}
   .dot{width:9px;height:9px;border-radius:50%;background:#ef4444;animation:pulse 1.3s infinite}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}70%{box-shadow:0 0 0 10px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
 
-  .stage{position:relative;border:1px solid var(--line2);border-radius:20px;overflow:hidden;
-         box-shadow:0 30px 90px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.02) inset}
-  svg#scene{display:block;width:100%;height:auto}
-
-  .rec{position:absolute;top:14px;left:16px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.1em;
-       background:rgba(6,10,20,.6);border:1px solid var(--line);padding:7px 12px;border-radius:8px;backdrop-filter:blur(6px)}
+  .stage{position:relative;border:1px solid var(--line2);border-radius:20px;overflow:hidden;height:600px;
+    background:#05070f;box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.02) inset}
+  #c3d{display:block;width:100%;height:100%}
+  .badge{position:absolute;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.1em;
+    background:rgba(6,10,20,.6);border:1px solid var(--line);padding:7px 12px;border-radius:8px;backdrop-filter:blur(6px)}
+  .rec{top:14px;left:16px}
   .rec .rd{width:9px;height:9px;border-radius:50%;background:#ef4444;animation:pulse 1.3s infinite}
+  .hint{bottom:70px;left:16px;color:var(--muted);font-weight:600;letter-spacing:.02em}
 
   .hud{position:absolute;top:14px;right:14px;width:250px;background:var(--panel);backdrop-filter:blur(10px);
-       border:1px solid var(--line2);border-radius:16px;padding:15px;font-variant-numeric:tabular-nums;
-       box-shadow:0 10px 40px rgba(0,0,0,.4)}
+    border:1px solid var(--line2);border-radius:16px;padding:15px;font-variant-numeric:tabular-nums;box-shadow:0 10px 40px rgba(0,0,0,.4)}
   .hud .timer{display:flex;align-items:baseline;gap:7px}
   .hud .big{font-size:40px;font-weight:800;letter-spacing:-.02em;text-shadow:0 0 20px rgba(255,210,30,.25)}
   .hud .max{font-size:14px;color:var(--muted)}
-  .now{font-size:12px;color:var(--muted);margin-top:2px;height:16px;letter-spacing:.03em}
+  .now{font-size:12px;color:var(--muted);margin-top:2px;height:16px}
   .ring{display:flex;align-items:center;gap:12px;margin:12px 0 8px}
   .ring .val{font-size:27px;font-weight:800}
   .ring .lab{font-size:10.5px;color:var(--muted);line-height:1.3}
@@ -82,6 +80,7 @@
   .ticks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted)}
   .foot{margin-top:12px;font-size:12px;color:var(--muted);text-align:center}
   .foot b{color:var(--ink)}
+  .loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700;letter-spacing:.1em}
 </style>
 </head>
 <body>
@@ -89,270 +88,15 @@
   <div class="topbar">
     <div class="logo"><span class="c24">CARS24</span></div>
     <div class="divider"></div>
-    <div class="title"><b>The Surface Reset Portal</b><span>CAR-A-THON · Live Engineering Simulation</span></div>
-    <div class="live"><span class="dot"></span> LIVE</div>
+    <div class="title"><b>The Surface Reset Portal</b><span>CAR-A-THON · 3D Live Simulation</span></div>
+    <div class="live"><span class="dot"></span> LIVE 3D</div>
   </div>
 
   <div class="stage">
-    <svg id="scene" viewBox="0 0 1200 640" role="img" aria-label="Realistic simulation of a car being cleaned in the Surface Reset Portal">
-      <defs>
-        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#141d3a"/><stop offset="0.55" stop-color="#0b1226"/>
-          <stop offset="0.55" stop-color="#0a0f1f"/><stop offset="1" stop-color="#070b18"/>
-        </linearGradient>
-        <linearGradient id="floorG" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#0f1730"/><stop offset="1" stop-color="#05070f"/>
-        </linearGradient>
-        <linearGradient id="steel" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#39456e"/><stop offset="0" stop-color="#39456e"/>
-          <stop offset="0.5" stop-color="#5a6a9c"/><stop offset="1" stop-color="#2b3556"/>
-        </linearGradient>
-        <linearGradient id="steelV" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#2b3556"/><stop offset="0.5" stop-color="#586a9e"/><stop offset="1" stop-color="#232c48"/>
-        </linearGradient>
-        <linearGradient id="carPaint" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#cfe6ff"/><stop offset="0.16" stop-color="#7db8ff"/>
-          <stop offset="0.5" stop-color="#2f83e6"/><stop offset="0.8" stop-color="#1a55a8"/><stop offset="1" stop-color="#123f7d"/>
-        </linearGradient>
-        <linearGradient id="glassG" x1="0" y1="0" x2="0.4" y2="1">
-          <stop offset="0" stop-color="#e8f3ff"/><stop offset="0.4" stop-color="#9fc0ea"/><stop offset="1" stop-color="#4a6595"/>
-        </linearGradient>
-        <radialGradient id="rim" cx="0.42" cy="0.4" r="0.7">
-          <stop offset="0" stop-color="#e9eef7"/><stop offset="0.5" stop-color="#9aa8c4"/><stop offset="1" stop-color="#4a556f"/>
-          <stop offset="1" stop-color="#4a556f"/>
-        </radialGradient>
-        <radialGradient id="tyre" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0.62" stop-color="#0a0b12"/><stop offset="0.86" stop-color="#171a24"/><stop offset="1" stop-color="#0a0b12"/>
-        </radialGradient>
-        <linearGradient id="glossBand" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
-        </linearGradient>
-        <linearGradient id="reflFade" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.85"/>
-        </linearGradient>
-        <radialGradient id="ledGlow" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stop-color="#bfe0ff" stop-opacity="0.9"/><stop offset="1" stop-color="#bfe0ff" stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="ionGlow" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stop-color="#c4b5fd" stop-opacity="0.7"/><stop offset="1" stop-color="#7c3aed" stop-opacity="0"/>
-        </radialGradient>
-        <linearGradient id="portalGlow" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#FFD21E" stop-opacity="0.14"/><stop offset="1" stop-color="#FFD21E" stop-opacity="0"/>
-        </linearGradient>
-        <linearGradient id="coneG" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#bae6fd" stop-opacity="0.85"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0.05"/>
-        </linearGradient>
-        <linearGradient id="airCone" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#fde68a" stop-opacity="0.7"/><stop offset="1" stop-color="#fbbf24" stop-opacity="0"/>
-        </linearGradient>
-        <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3"/></filter>
-        <filter id="blurBig" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
-        <clipPath id="bodyClip"><path id="bodyClipPath" d=""/></clipPath>
-      </defs>
-
-      <!-- environment -->
-      <rect x="0" y="0" width="1200" height="640" fill="url(#sky)"/>
-      <rect x="0" y="360" width="1200" height="280" fill="url(#floorG)"/>
-      <!-- ceiling LED bars -->
-      <g>
-        <rect x="180" y="26" width="300" height="12" rx="6" fill="#dff0ff"/><ellipse cx="330" cy="46" rx="220" ry="34" fill="url(#ledGlow)" opacity="0.5"/>
-        <rect x="720" y="26" width="300" height="12" rx="6" fill="#dff0ff"/><ellipse cx="870" cy="46" rx="220" ry="34" fill="url(#ledGlow)" opacity="0.5"/>
-      </g>
-      <!-- volumetric light cones -->
-      <polygon points="330,40 250,360 410,360" fill="#bfe0ff" opacity="0.05"/>
-      <polygon points="870,40 790,360 950,360" fill="#bfe0ff" opacity="0.05"/>
-      <!-- Cars24 wall sign -->
-      <g opacity="0.92">
-        <rect x="70" y="86" width="150" height="46" rx="9" fill="#0e1533" stroke="#26304f"/>
-        <rect x="82" y="98" width="80" height="22" rx="5" fill="#FFD21E"/>
-        <text x="122" y="114" text-anchor="middle" font-size="14" font-weight="900" fill="#0A0E1A">CARS24</text>
-        <text x="192" y="114" text-anchor="middle" font-size="10" font-weight="700" fill="#93A0C4" letter-spacing="1">MRL</text>
-      </g>
-      <text x="1120" y="360" text-anchor="end" font-size="13" font-weight="800" fill="#1e2b4d" letter-spacing="3">BAY&#160;03</text>
-      <!-- floor hazard stripes -->
-      <g opacity="0.5">
-        <rect x="300" y="470" width="600" height="7" fill="#FFD21E" opacity="0.5"/>
-        <g fill="#FFD21E" opacity="0.28">
-          <polygon points="300,478 330,478 306,510 276,510"/><polygon points="350,478 380,478 356,510 326,510"/>
-          <polygon points="820,478 850,478 826,510 796,510"/><polygon points="870,478 900,478 876,510 846,510"/>
-        </g>
-      </g>
-
-      <!-- CAR REFLECTION (mirrored, blurred) -->
-      <g id="carReflect" opacity="0.22" filter="url(#blurBig)"></g>
-      <rect x="300" y="452" width="620" height="120" fill="url(#reflFade)"/>
-
-      <!-- PORTAL structure -->
-      <!-- columns -->
-      <g>
-        <rect x="292" y="120" width="30" height="332" rx="5" fill="url(#steelV)" stroke="#1b2b4a"/>
-        <rect x="292" y="120" width="30" height="332" rx="5" fill="url(#steelV)" stroke="#1b2b4a"/>
-        <rect x="286" y="446" width="42" height="16" rx="3" fill="#2b3556"/>
-        <rect x="878" y="120" width="30" height="332" rx="5" fill="url(#steelV)"/>
-        <rect x="872" y="446" width="42" height="16" rx="3" fill="#2b3556"/>
-        <!-- rivets -->
-        <g fill="#8ea0cf" opacity="0.6">
-          <circle cx="307" cy="150" r="2.4"/><circle cx="307" cy="250" r="2.4"/><circle cx="307" cy="350" r="2.4"/>
-          <circle cx="893" cy="150" r="2.4"/><circle cx="893" cy="250" r="2.4"/><circle cx="893" cy="350" r="2.4"/>
-        </g>
-        <!-- top gantry beam -->
-        <rect x="286" y="96" width="628" height="34" rx="7" fill="url(#steel)" stroke="#1b2b4a"/>
-        <rect x="286" y="96" width="628" height="10" rx="5" fill="#6a7cae" opacity="0.5"/>
-        <text x="600" y="118" text-anchor="middle" font-size="11" font-weight="800" fill="#0a0f1f" fill="#0b1226" letter-spacing="3">SURFACE&#160;RESET&#160;PORTAL</text>
-        <!-- portal status LEDs -->
-        <g id="portalLeds"></g>
-      </g>
-      <rect id="portalWash" x="286" y="96" width="628" height="356" fill="url(#portalGlow)" opacity="0"/>
-
-      <!-- particle & fx layers behind car -->
-      <g id="airLayer"></g>
-
-      <!-- =========== CAR =========== -->
-      <g id="car">
-        <ellipse cx="600" cy="454" rx="196" ry="16" fill="#000" opacity="0.5"/>
-        <!-- lower reflection strip on floor handled globally -->
-        <!-- BODY -->
-        <path id="bodyMain" d="M432 402 Q432 372 470 366 L520 366 Q542 320 586 316 L636 316 Q694 318 720 366 L766 372 Q778 376 778 402 L778 420 Q778 432 764 432 L446 432 Q432 432 432 420 Z" fill="url(#carPaint)"/>
-        <!-- lower shadow band -->
-        <path d="M432 414 L778 414 L778 420 Q778 432 764 432 L446 432 Q432 432 432 420 Z" fill="#0e2b55" opacity="0.55"/>
-        <!-- specular top highlight -->
-        <path id="specHi" d="M470 366 Q542 322 586 318 L636 318 Q690 320 716 364 Q640 344 560 348 Q506 352 470 366 Z" fill="#fff" opacity="0.30"/>
-        <!-- greenhouse -->
-        <path d="M528 366 Q546 328 584 325 L628 325 Q676 328 702 366 Z" fill="url(#glassG)"/>
-        <path d="M534 362 Q550 334 584 331 L610 331 Z" fill="#fff" opacity="0.35"/>
-        <line x1="612" y1="325" x2="612" y2="366" stroke="#0e2b55" stroke-width="4"/>
-        <!-- chrome window trim -->
-        <path d="M528 366 Q546 328 584 325 L628 325 Q676 328 702 366" fill="none" stroke="#cdd8ee" stroke-width="2.5"/>
-        <!-- doors / handle / mirror -->
-        <line x1="612" y1="372" x2="612" y2="426" stroke="#12305f" stroke-width="1.6"/>
-        <line x1="672" y1="372" x2="672" y2="426" stroke="#12305f" stroke-width="1.2" opacity="0.7"/>
-        <rect x="624" y="388" width="22" height="5" rx="2.5" fill="#0e2b55"/>
-        <path d="M520 360 q-16 -2 -18 8 q10 4 20 0 Z" fill="#123f7d"/>
-        <!-- headlight / taillight -->
-        <path d="M766 380 q14 2 12 16 l-14 0 Z" fill="#fff6cf"/><circle cx="770" cy="388" r="8" fill="#fff6cf" opacity="0.5" filter="url(#soft)"/>
-        <path d="M446 380 q-14 2 -12 16 l14 0 Z" fill="#ff5d5d"/><circle cx="440" cy="390" r="7" fill="#ff5d5d" opacity="0.45" filter="url(#soft)"/>
-        <!-- wheel arches -->
-        <circle cx="512" cy="430" r="50" fill="#0a0f1f" fill="#0a0f1f"/>
-        <circle cx="688" cy="430" r="50" fill="#0a0f1f"/>
-        <!-- WHEELS -->
-        <g transform="translate(512 430)">
-          <circle r="46" fill="url(#tyre)"/><circle r="46" fill="none" stroke="#05060a" stroke-width="2"/>
-          <circle r="31" fill="url(#rim)"/>
-          <g id="spokesF">
-            <g fill="#c3ccdd" stroke="#7f8db0" stroke-width="1">
-              <polygon points="0,-30 5,-8 -5,-8"/><polygon points="0,30 5,8 -5,8"/>
-              <polygon points="-30,0 -8,5 -8,-5"/><polygon points="30,0 8,5 8,-5"/>
-              <polygon points="-21,-21 -3,-9 -9,-3"/><polygon points="21,21 3,9 9,3"/>
-              <polygon points="-21,21 -9,3 -3,9"/><polygon points="21,-21 9,-3 3,-9"/>
-            </g>
-          </g>
-          <circle r="8" fill="#8ea0cf"/><circle r="8" fill="none" stroke="#5a6a9c" stroke-width="1.5"/>
-        </g>
-        <g transform="translate(688 430)">
-          <circle r="46" fill="url(#tyre)"/><circle r="46" fill="none" stroke="#05060a" stroke-width="2"/>
-          <circle r="31" fill="url(#rim)"/>
-          <g id="spokesR">
-            <g fill="#c3ccdd" stroke="#7f8db0" stroke-width="1">
-              <polygon points="0,-30 5,-8 -5,-8"/><polygon points="0,30 5,8 -5,8"/>
-              <polygon points="-30,0 -8,5 -8,-5"/><polygon points="30,0 8,5 8,-5"/>
-              <polygon points="-21,-21 -3,-9 -9,-3"/><polygon points="21,21 3,9 9,3"/>
-              <polygon points="-21,21 -9,3 -3,9"/><polygon points="21,-21 9,-3 3,-9"/>
-            </g>
-          </g>
-          <circle r="8" fill="#8ea0cf"/><circle r="8" fill="none" stroke="#5a6a9c" stroke-width="1.5"/>
-        </g>
-        <!-- GRIME (clipped) -->
-        <g id="grime" clip-path="url(#bodyClip)"></g>
-        <!-- FOAM (clipped) -->
-        <g id="foam" clip-path="url(#bodyClip)"></g>
-        <!-- WATER SHEET (clipped) -->
-        <g id="sheet" clip-path="url(#bodyClip)"></g>
-        <!-- gloss sweep -->
-        <rect id="glossSweep" clip-path="url(#bodyClip)" x="380" y="312" width="130" height="130" fill="url(#glossBand)" opacity="0" transform="skewX(-16)"/>
-        <g id="sparkle" opacity="0"></g>
-        <!-- scan grid overlay -->
-        <g id="scanGrid" clip-path="url(#bodyClip)" opacity="0"></g>
-      </g>
-
-      <!-- =========== MACHINES =========== -->
-      <!-- MODULE 2: IONIZER BAR -->
-      <g id="ionBar" opacity="0">
-        <rect x="470" y="150" width="260" height="14" rx="5" fill="url(#steel)" stroke="#1b2b4a"/>
-        <g id="ionTips" fill="#c4b5fd"></g>
-        <text x="600" y="146" text-anchor="middle" font-size="8.5" font-weight="800" fill="#c4b5fd" letter-spacing="2">IONIZED&#160;AIR&#160;BAR</text>
-      </g>
-      <g id="ionLayer"></g>
-
-      <!-- MODULE 3: SPRAY MANIFOLD -->
-      <g id="sprayRig" opacity="0">
-        <rect x="452" y="168" width="296" height="12" rx="5" fill="url(#steel)"/>
-        <g fill="#5a6a9c"><rect x="470" y="180" width="6" height="10"/><rect x="520" y="180" width="6" height="10"/><rect x="570" y="180" width="6" height="10"/><rect x="620" y="180" width="6" height="10"/><rect x="670" y="180" width="6" height="10"/><rect x="720" y="180" width="6" height="10"/></g>
-        <text x="600" y="164" text-anchor="middle" font-size="8.5" font-weight="800" fill="#38bdf8" letter-spacing="2">RINSELESS&#160;POLYMER&#160;MANIFOLD</text>
-      </g>
-      <g id="sprayCones" opacity="0"></g>
-      <g id="mistLayer"></g>
-
-      <!-- MODULE 4: TEXTILE PADS (hydraulic) -->
-      <!-- roof actuator -->
-      <g id="roofRig" opacity="0">
-        <rect id="roofPiston" x="592" y="130" width="16" height="60" fill="#5a6a9c"/>
-        <g id="roofPad" transform="translate(0,0)">
-          <rect x="486" y="188" width="228" height="20" rx="6" fill="#2b3556" stroke="#1b2b4a"/>
-          <rect x="492" y="206" width="216" height="16" rx="4" fill="#34D399"/>
-          <g id="roofTex" fill="#0f7a55"></g>
-          <text x="600" y="202" text-anchor="middle" font-size="8.5" font-weight="800" fill="#eafff6" letter-spacing="2">CONFORMAL&#160;TEXTILE</text>
-        </g>
-      </g>
-      <!-- side pads with piston rods -->
-      <g id="padRigL" opacity="0">
-        <rect id="rodL" x="322" y="392" width="60" height="9" fill="#5a6a9c"/>
-        <g id="padL" transform="translate(0,0)">
-          <rect x="360" y="360" width="26" height="76" rx="6" fill="#2b3556" stroke="#1b2b4a"/>
-          <rect x="378" y="366" width="12" height="64" rx="4" fill="#34D399"/>
-        </g>
-      </g>
-      <g id="padRigR" opacity="0">
-        <rect id="rodR" x="818" y="392" width="60" height="9" fill="#5a6a9c"/>
-        <g id="padR" transform="translate(0,0)">
-          <rect x="814" y="360" width="26" height="76" rx="6" fill="#2b3556" stroke="#1b2b4a"/>
-          <rect x="810" y="366" width="12" height="64" rx="4" fill="#34D399"/>
-        </g>
-      </g>
-
-      <!-- MODULE 5: AIR KNIVES (angled units) -->
-      <g id="airKnifeL" opacity="0">
-        <g transform="rotate(-28 470 210)">
-          <rect x="430" y="196" width="80" height="26" rx="5" fill="url(#steel)" stroke="#1b2b4a"/>
-          <rect x="506" y="203" width="10" height="12" fill="#8ea0cf"/>
-        </g>
-        <polygon id="airConeL" points="0,0 0,0 0,0" fill="url(#airCone)" opacity="0.7"/>
-      </g>
-      <g id="airKnifeR" opacity="0">
-        <g transform="rotate(28 730 210)">
-          <rect x="690" y="196" width="80" height="26" rx="5" fill="url(#steel)" stroke="#1b2b4a"/>
-          <rect x="684" y="203" width="10" height="12" fill="#8ea0cf"/>
-        </g>
-        <polygon id="airConeR" points="0,0 0,0 0,0" fill="url(#airCone)" opacity="0.7"/>
-      </g>
-      <g id="steamLayer"></g>
-
-      <!-- MODULE 6: GLOSS ROBOTIC ARM -->
-      <g id="glossArm" opacity="0">
-        <rect x="592" y="130" width="14" height="40" fill="#4a556f"/>
-        <g id="armSeg" transform="rotate(0 599 170)">
-          <rect x="594" y="168" width="10" height="70" rx="4" fill="#5a6a9c"/>
-          <g id="armHead" transform="translate(0,0)">
-            <rect x="586" y="236" width="26" height="16" rx="4" fill="#2b3556" stroke="#1b2b4a"/>
-            <polygon points="599,252 585,272 613,272" fill="#f472b6" opacity="0.5"/>
-          </g>
-        </g>
-        <text x="640" y="150" font-size="8.5" font-weight="800" fill="#f472b6" letter-spacing="1">SiO₂ GLOSS ARM</text>
-      </g>
-
-      <text id="stageCaption" x="600" y="600" text-anchor="middle" font-size="13" font-weight="700" fill="#93A0C4">Press START — dirty car enters the portal</text>
-    </svg>
-
-    <div class="rec"><span class="rd"></span> REC</div>
+    <canvas id="c3d"></canvas>
+    <div class="loading" id="loading">LOADING 3D ENGINE…</div>
+    <div class="badge rec"><span class="rd"></span> REC</div>
+    <div class="badge hint">🖱️ Drag to orbit · scroll to zoom</div>
 
     <div class="hud">
       <div class="timer"><span class="big" id="tSec">0.0</span><span class="max">/ 24.0 s</span></div>
@@ -384,13 +128,14 @@
     <div id="tlRows"></div>
     <div class="axis"><div></div><div class="ticks"><span>0s</span><span>4s</span><span>8s</span><span>12s</span><span>16s</span><span>20s</span><span>24s</span></div></div>
     <div class="playhead" id="playhead"></div>
-    <div class="foot">6 machines run <b>concurrently</b>, not in sequence — that overlap is how <b>4 min → 24 s</b> becomes physically real.</div>
+    <div class="foot">6 machines run <b>concurrently</b> in 3D space — that overlap is how <b>4 min → 24 s</b> becomes physically real.</div>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 const S=id=>document.getElementById(id);
-const NS="http://www.w3.org/2000/svg";
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const seg=(t,s,e)=>clamp((t-s)/(e-s),0,1);
 const lerp=(a,b,u)=>a+(b-a)*u;
@@ -408,190 +153,251 @@ const M=[
 ];
 const TOTAL=24;
 
-// timeline rows
+// timeline + hud lights (DOM)
 const rows=S('tlRows');
-M.forEach((m,i)=>{
-  const r=document.createElement('div'); r.className='tl-row';
+M.forEach((m,i)=>{const r=document.createElement('div');r.className='tl-row';
   r.innerHTML=`<div class="tl-label" id="lab_${m.k}" style="color:${m.col}">${i+1} · ${m.name}</div>
    <div class="tl-track"><div class="tl-span" id="span_${m.k}" style="left:${m.s/TOTAL*100}%;width:${(m.e-m.s)/TOTAL*100}%;background:${m.col}"></div>
    <div class="tl-fill" id="fill_${m.k}" style="left:${m.s/TOTAL*100}%;background:${m.col}44"></div></div>`;
-  rows.appendChild(r);
-});
-// hud module lights
+  rows.appendChild(r);});
 const mlWrap=S('modlights');
-M.forEach(m=>{ const d=document.createElement('div'); d.className='ml'; d.id='ml_'+m.k;
-  d.innerHTML=`<span class="led" style="background:#243052"></span>${m.name}`; mlWrap.appendChild(d); });
-
-// clip path
-const bodyD="M432 402 Q432 372 470 366 L520 366 Q542 320 586 316 L636 316 Q694 318 720 366 L766 372 Q778 376 778 402 L778 420 Q778 432 764 432 L446 432 Q432 432 432 420 Z";
-S('bodyClipPath').setAttribute('d',bodyD);
-
-// portal LEDs
-const pl=S('portalLeds');
-for(let i=0;i<10;i++){const c=document.createElementNS(NS,'circle');c.setAttribute('cx',320+i*28);c.setAttribute('cy',113);c.setAttribute('r',3);c.setAttribute('fill','#243052');c.dataset.i=i;pl.appendChild(c);}
-
-// ion emitter tips
-const ionTips=S('ionTips');
-for(let i=0;i<9;i++){const p=document.createElementNS(NS,'polygon');const x=485+i*28;p.setAttribute('points',`${x-3},164 ${x+3},164 ${x},174`);ionTips.appendChild(p);}
-// roof textile texture lines
-const roofTex=S('roofTex');
-for(let i=0;i<18;i++){const r=document.createElementNS(NS,'rect');r.setAttribute('x',496+i*12);r.setAttribute('y',208);r.setAttribute('width',5);r.setAttribute('height',12);r.setAttribute('rx',2);roofTex.appendChild(r);}
-
-// grime
-const grime=S('grime'), grimeSpots=[];
-const tint=document.createElementNS(NS,'rect');tint.setAttribute('x',428);tint.setAttribute('y',312);tint.setAttribute('width',354);tint.setAttribute('height',124);tint.setAttribute('fill','#5c4a2e');tint.setAttribute('opacity',0.42);grime.appendChild(tint);
-for(let i=0;i<110;i++){const c=document.createElementNS(NS,'circle');const x=rnd(434,776),y=rnd(320,430),r=rnd(1.5,7);c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',r);const b=Math.random();c.setAttribute('fill',b<0.6?'#6b5a3a':(b<0.85?'#463a28':'#7a6a48'));c.dataset.o=rnd(0.35,0.8);c.setAttribute('opacity',c.dataset.o);grime.appendChild(c);grimeSpots.push({el:c,order:Math.random()});}
-
-// foam blobs
-const foam=S('foam'), foamB=[];
-for(let i=0;i<70;i++){const c=document.createElementNS(NS,'circle');c.setAttribute('r',rnd(4,11));c.setAttribute('fill','#ffffff');c.setAttribute('opacity',rnd(0.6,0.95));foam.appendChild(c);foamB.push({el:c,x:rnd(436,774),y:rnd(320,430),ph:Math.random()});}
-
-// water sheet droplets
-const sheet=S('sheet'), sheetD=[];
-for(let i=0;i<40;i++){const c=document.createElementNS(NS,'ellipse');c.setAttribute('rx',rnd(1.5,3));c.setAttribute('ry',rnd(3,7));c.setAttribute('fill','#bfe0ff');c.setAttribute('opacity',0.7);sheet.appendChild(c);sheetD.push({el:c,x:rnd(436,774),sp:rnd(0.8,1.6),ph:Math.random()});}
-
-// ion particles
-const ionLayer=S('ionLayer'), ions=[];
-for(let i=0;i<44;i++){const c=document.createElementNS(NS,'circle');c.setAttribute('r',rnd(1.4,3));c.setAttribute('fill','#d6ccff');ionLayer.appendChild(c);ions.push({el:c,x:rnd(440,760),y0:rnd(360,428),sp:rnd(0.6,1.4),ph:Math.random()});}
-// ion arcs
-const ionArcs=[];
-for(let i=0;i<9;i++){const l=document.createElementNS(NS,'line');l.setAttribute('stroke','#c4b5fd');l.setAttribute('stroke-width',1.4);l.setAttribute('opacity',0);ionLayer.appendChild(l);ionArcs.push({el:l,x:485+i*28});}
-
-// spray cones + droplets
-const sprayCones=S('sprayCones'), cones=[];
-const noz=[476,526,576,626,676,726];
-noz.forEach(x=>{const p=document.createElementNS(NS,'polygon');p.setAttribute('points',`${x},190 ${x-22},330 ${x+22},330`);p.setAttribute('fill','url(#coneG)');sprayCones.appendChild(p);cones.push(p);});
-const mistLayer=S('mistLayer'), mist=[];
-for(let i=0;i<60;i++){const c=document.createElementNS(NS,'circle');c.setAttribute('r',rnd(1.4,3));c.setAttribute('fill','#8ed3fb');mistLayer.appendChild(c);mist.push({el:c,x:noz[i%6]+rnd(-16,16),sp:rnd(0.9,1.8),ph:Math.random()});}
-
-// air droplets + streaks
-const airLayer=S('airLayer'), airP=[];
-for(let i=0;i<50;i++){const c=document.createElementNS(NS,'ellipse');c.setAttribute('rx',rnd(1.5,3.2));c.setAttribute('ry',1.4);c.setAttribute('fill','#fde68a');airLayer.appendChild(c);const side=Math.random()<0.5?-1:1;airP.push({el:c,y:rnd(340,428),sp:rnd(1.3,2.6),ph:Math.random(),side});}
-// steam
-const steamLayer=S('steamLayer'), steam=[];
-for(let i=0;i<20;i++){const c=document.createElementNS(NS,'circle');c.setAttribute('r',rnd(8,20));c.setAttribute('fill','#dfeeff');c.setAttribute('opacity',0);c.setAttribute('filter','url(#soft)');steamLayer.appendChild(c);steam.push({el:c,x:rnd(440,760),sp:rnd(0.3,0.7),ph:Math.random()});}
-
-// sparkles
-const sparkle=S('sparkle');
-for(let i=0;i<12;i++){const t=document.createElementNS(NS,'text');t.setAttribute('x',rnd(440,760));t.setAttribute('y',rnd(322,428));t.setAttribute('font-size',rnd(9,18));t.setAttribute('fill','#fff');t.setAttribute('text-anchor','middle');t.textContent='✦';sparkle.appendChild(t);}
-// scan grid
-const scanGrid=S('scanGrid');
-for(let i=0;i<9;i++){const l=document.createElementNS(NS,'line');l.setAttribute('x1',432+i*40);l.setAttribute('y1',312);l.setAttribute('x2',432+i*40);l.setAttribute('y2',436);l.setAttribute('stroke','#7dd3fc');l.setAttribute('stroke-width',0.8);scanGrid.appendChild(l);}
-
-// build reflection = clone of car (added after car exists)
-const carEl=S('car');
-const reflect=S('carReflect');
-const reflClone=carEl.cloneNode(true);
-reflClone.removeAttribute('id');
-reflect.appendChild(reflClone);
-
-// ---- clock ----
-let T=-3.2, playing=false, speed=1, last=performance.now(), done=false;
-function setSpeed(s){speed=s;document.querySelectorAll('.speed button').forEach(b=>b.classList.toggle('on',+b.dataset.s===s));}
-document.querySelectorAll('.speed button').forEach(b=>b.onclick=()=>setSpeed(+b.dataset.s));
-S('go').onclick=start; function start(){ if(done||T>=26)reset(); playing=true; S('go').textContent='⏸ PAUSE'; S('go').onclick=toggle; }
-function toggle(){playing=!playing;S('go').textContent=playing?'⏸ PAUSE':'▶ RESUME';}
-S('replay').onclick=reset; function reset(){T=-3.2;done=false;playing=true;S('go').textContent='⏸ PAUSE';S('go').onclick=toggle;}
+M.forEach(m=>{const d=document.createElement('div');d.className='ml';d.id='ml_'+m.k;
+  d.innerHTML=`<span class="led"></span>${m.name}`;mlWrap.appendChild(d);});
 
 function cleanFraction(tc){
-  if(tc<=2)  return 0;
-  if(tc<=5)  return ease(seg(tc,2,5))*0.18;
-  if(tc<=6)  return 0.18;
-  if(tc<=16) return 0.18+ease(seg(tc,6,16))*0.72;
-  if(tc<=22) return 0.90+ease(seg(tc,16,22))*0.10;
+  if(tc<=2)return 0;
+  if(tc<=5)return ease(seg(tc,2,5))*0.18;
+  if(tc<=6)return 0.18;
+  if(tc<=16)return 0.18+ease(seg(tc,6,16))*0.72;
+  if(tc<=22)return 0.90+ease(seg(tc,16,22))*0.10;
   return 1.0;
 }
 
-function render(){
+/* ============ THREE.JS SCENE ============ */
+let renderer,scene,camera,controls,clock3;
+const G={}; // named objects
+function build3D(){
+  const canvas=S('c3d');
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+  renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.15;
+
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x070b16);
+  scene.fog=new THREE.Fog(0x070b16, 18, 42);
+
+  camera=new THREE.PerspectiveCamera(48, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
+  camera.position.set(9,4.6,9.5);
+
+  controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.target.set(0,1.1,0); controls.enableDamping=true; controls.dampingFactor=0.06;
+  controls.minDistance=6; controls.maxDistance=22; controls.maxPolarAngle=Math.PI*0.49;
+  controls.autoRotate=true; controls.autoRotateSpeed=0.5;
+
+  // lights
+  scene.add(new THREE.HemisphereLight(0x9fc0ff,0x0a0f1f,0.55));
+  const key=new THREE.DirectionalLight(0xffffff,1.1); key.position.set(6,12,8);
+  key.castShadow=true; key.shadow.mapSize.set(2048,2048);
+  key.shadow.camera.left=-12;key.shadow.camera.right=12;key.shadow.camera.top=12;key.shadow.camera.bottom=-12;
+  scene.add(key);
+  const rim=new THREE.DirectionalLight(0x6aa0ff,0.7); rim.position.set(-8,5,-6); scene.add(rim);
+  // ceiling LED strips (emissive bars + point lights)
+  [-5,5].forEach(x=>{
+    const bar=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.2,7),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xdff0ff,emissiveIntensity:1.6}));
+    bar.position.set(x,7.4,0); scene.add(bar);
+    const pl=new THREE.PointLight(0xbfe0ff,0.7,30); pl.position.set(x,7,0); scene.add(pl);
+  });
+  // portal accent lights
+  G.portalLight=new THREE.PointLight(0xFFD21E,0,26); G.portalLight.position.set(0,3.4,0); scene.add(G.portalLight);
+
+  // floor (reflective-ish)
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(60,60),
+    new THREE.MeshStandardMaterial({color:0x0b1226,metalness:0.6,roughness:0.35}));
+  floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+  // hazard lane
+  const lane=new THREE.Mesh(new THREE.PlaneGeometry(3.2,20),new THREE.MeshStandardMaterial({color:0x0e1533,roughness:0.8}));
+  lane.rotation.x=-Math.PI/2; lane.position.y=0.01; scene.add(lane);
+  for(let i=-4;i<=4;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(3.0,0.02,0.12),new THREE.MeshStandardMaterial({color:0xFFD21E,emissive:0x3a2f00,roughness:0.6}));s.position.set(0,0.02,i*2.2);s.rotation.y=0;scene.add(s);}
+  // grid helper faint
+  const grid2=new THREE.GridHelper(60,60,0x1b2b4a,0x111a30); grid2.position.y=0.005; scene.add(grid2);
+
+  buildPortal();
+  buildCar();
+  buildMachines();
+  buildParticles();
+
+  window.addEventListener('resize',onResize);
+  S('loading').style.display='none';
+}
+
+function steelMat(){return new THREE.MeshStandardMaterial({color:0x4a5a86,metalness:0.9,roughness:0.35});}
+
+function buildPortal(){
+  const g=new THREE.Group(); G.portal=g; scene.add(g);
+  const colGeo=new THREE.BoxGeometry(0.5,6,0.6);
+  [-2.4,2.4].forEach(z=>{const c=new THREE.Mesh(colGeo,steelMat());c.position.set(0,3,z);c.castShadow=true;g.add(c);
+    const base=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.25,1.0),steelMat());base.position.set(0,0.12,z);g.add(base);});
+  const beam=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.5,5.4),steelMat()); beam.position.set(0,6,0); beam.castShadow=true; g.add(beam);
+  // portal glow ring (emissive frame)
+  const ringMat=new THREE.MeshStandardMaterial({color:0x111a30,emissive:0xFFD21E,emissiveIntensity:0});
+  G.portalRing=new THREE.Mesh(new THREE.TorusGeometry(2.6,0.06,8,40),ringMat);
+  G.portalRing.position.set(0,2.6,0); G.portalRing.rotation.y=Math.PI/2; g.add(G.portalRing);
+  // status LEDs on beam
+  G.leds=[];
+  for(let i=0;i<10;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(0.06,8,8),new THREE.MeshStandardMaterial({color:0x243052,emissive:0x000000}));m.position.set(0.36,6,-2.3+i*0.51);g.add(m);G.leds.push(m);}
+}
+
+function buildCar(){
+  const car=new THREE.Group(); G.car=car; scene.add(car);
+  // dirty->clean material
+  G.paint=new THREE.MeshStandardMaterial({color:0x6b5a3a,metalness:0.5,roughness:0.85});
+  // lower body
+  const body=new THREE.Mesh(new THREE.BoxGeometry(4.2,0.9,1.9),G.paint); body.position.y=0.95; body.castShadow=true; car.add(body);
+  // hood/trunk taper
+  const hood=new THREE.Mesh(new THREE.BoxGeometry(1.3,0.5,1.86),G.paint); hood.position.set(1.5,1.15,0); car.add(hood);
+  const trunk=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.55,1.86),G.paint); trunk.position.set(-1.65,1.15,0); car.add(trunk);
+  // cabin
+  const cabin=new THREE.Mesh(new THREE.BoxGeometry(2.0,0.75,1.7),G.paint); cabin.position.set(-0.15,1.75,0); car.add(cabin);
+  // glass
+  const glassMat=new THREE.MeshStandardMaterial({color:0x0a1730,metalness:0.4,roughness:0.08,transparent:true,opacity:0.7});
+  const green=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.62,1.72),glassMat); green.position.set(-0.15,1.78,0); car.add(green);
+  // roof pad target marker (roof top y)
+  G.roofY=2.15;
+  // lights
+  const hl=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.3,1.5),new THREE.MeshStandardMaterial({color:0xfff6cf,emissive:0xfff2b0,emissiveIntensity:0.8}));hl.position.set(2.14,1.0,0);car.add(hl);
+  const tl=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.28,1.5),new THREE.MeshStandardMaterial({color:0xff5d5d,emissive:0xff2222,emissiveIntensity:0.7}));tl.position.set(-2.16,1.05,0);car.add(tl);
+  // wheels
+  G.wheels=[];
+  const tyreMat=new THREE.MeshStandardMaterial({color:0x0b0d14,roughness:0.9,metalness:0.1});
+  const rimMat=new THREE.MeshStandardMaterial({color:0xd6dceb,metalness:1.0,roughness:0.25});
+  [[1.3,1],[1.3,-1],[-1.3,1],[-1.3,-1]].forEach(([x,zs])=>{
+    const w=new THREE.Group();
+    const tyre=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.55,0.35,24),tyreMat); tyre.rotation.x=Math.PI/2; w.add(tyre);
+    const rim=new THREE.Mesh(new THREE.CylinderGeometry(0.33,0.33,0.37,20),rimMat); rim.rotation.x=Math.PI/2; w.add(rim);
+    for(let s=0;s<6;s++){const sp=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.08,0.06),rimMat);sp.rotation.x=Math.PI/2;sp.rotation.z=s*Math.PI/3;w.add(sp);}
+    w.position.set(x,0.55,zs*1.02); w.castShadow=true; car.add(w); G.wheels.push(w);
+  });
+  // shadow contact
+  car.position.x=-9; // start off-screen (drive-in)
+}
+
+function buildMachines(){
+  // roof textile pad
+  const rp=new THREE.Group(); G.roofPad=rp;
+  const housing=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.25,1.9),steelMat()); rp.add(housing);
+  const foamPad=new THREE.Mesh(new THREE.BoxGeometry(3.2,0.22,1.8),new THREE.MeshStandardMaterial({color:0x34D399,roughness:0.9,emissive:0x0a3b28,emissiveIntensity:0.3})); foamPad.position.y=-0.22; rp.add(foamPad);
+  const piston=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,2,10),steelMat()); piston.position.y=1.2; rp.add(piston); G.roofPiston=piston;
+  rp.position.set(0,5,0); rp.visible=false; scene.add(rp);
+  // side pads (roller cylinders)
+  const padMat=new THREE.MeshStandardMaterial({color:0x34D399,roughness:0.85,emissive:0x0a3b28,emissiveIntensity:0.25});
+  G.sidePads=[];
+  [1,-1].forEach(zs=>{
+    const grp=new THREE.Group();
+    const roller=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.35,3.2,18),padMat); roller.position.set(0,1.1,0); grp.add(roller);
+    const arm=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.14,0.14),steelMat()); arm.position.set(0,1.1,zs*0.6); grp.add(arm);
+    grp.position.set(0,0,zs*3.0); grp.visible=false; scene.add(grp); G.sidePads.push({grp,roller,zs});
+  });
+  // ionizer bar
+  const ionBar=new THREE.Mesh(new THREE.BoxGeometry(3.6,0.15,0.15),new THREE.MeshStandardMaterial({color:0x2b3556,emissive:0xA78BFA,emissiveIntensity:0}));
+  ionBar.position.set(0,3.6,0); scene.add(ionBar); G.ionBar=ionBar;
+  // spray manifold
+  const man=new THREE.Group();
+  const pipe=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,3.6,10),steelMat()); pipe.rotation.z=Math.PI/2; man.add(pipe);
+  man.position.set(0,3.9,0); scene.add(man); G.manifold=man;
+  // air-knife units
+  G.airKnives=[];
+  [1,-1].forEach(zs=>{const u=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.25,1.4),steelMat());u.position.set(zs*1.0,3.2,zs*2.0);u.rotation.z=zs*0.5;u.visible=false;scene.add(u);G.airKnives.push({u,zs});});
+  // gloss arm
+  const arm=new THREE.Group();
+  const seg1=new THREE.Mesh(new THREE.BoxGeometry(0.12,1.6,0.12),steelMat()); seg1.position.y=-0.8; arm.add(seg1);
+  const head=new THREE.Mesh(new THREE.ConeGeometry(0.18,0.4,10),new THREE.MeshStandardMaterial({color:0xF472B6,emissive:0xF472B6,emissiveIntensity:0.6})); head.position.y=-1.7; head.rotation.x=Math.PI; arm.add(head);
+  arm.position.set(0,5.6,0); arm.visible=false; scene.add(arm); G.glossArm=arm;
+}
+
+function makePoints(n,color,size){
+  const geo=new THREE.BufferGeometry();
+  const pos=new Float32Array(n*3);
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const mat=new THREE.PointsMaterial({color,size,transparent:true,opacity:0.9,depthWrite:false,blending:THREE.AdditiveBlending});
+  const pts=new THREE.Points(geo,mat); scene.add(pts);
+  return {pts,pos,geo,n};
+}
+function buildParticles(){
+  G.ion=makePoints(120,0xc4b5fd,0.09);
+  G.mist=makePoints(200,0x8ed3fb,0.07);
+  G.air=makePoints(160,0xfde68a,0.08);
+  G.spark=makePoints(60,0xffffff,0.1);
+  G.foam=makePoints(160,0xffffff,0.13);
+  [G.ion,G.mist,G.air,G.spark,G.foam].forEach(p=>p.pts.visible=false);
+  // random seeds
+  G.seed=[]; for(let i=0;i<220;i++)G.seed.push({a:Math.random(),b:Math.random(),c:Math.random(),d:Math.random()});
+}
+
+function onResize(){const canvas=S('c3d');camera.aspect=canvas.clientWidth/canvas.clientHeight;camera.updateProjectionMatrix();renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);}
+
+/* ============ CLOCK + UPDATE ============ */
+let T=-3.2, playing=false, speed=1, done=false, lastMs=performance.now();
+function setSpeed(s){speed=s;document.querySelectorAll('.speed button').forEach(b=>b.classList.toggle('on',+b.dataset.s===s));}
+document.querySelectorAll('.speed button').forEach(b=>b.onclick=()=>setSpeed(+b.dataset.s));
+S('go').onclick=start; function start(){if(done||T>=26)reset();playing=true;S('go').textContent='⏸ PAUSE';S('go').onclick=toggle;controls.autoRotate=true;}
+function toggle(){playing=!playing;S('go').textContent=playing?'⏸ PAUSE':'▶ RESUME';}
+S('replay').onclick=reset; function reset(){T=-3.2;done=false;playing=true;S('go').textContent='⏸ PAUSE';S('go').onclick=toggle;}
+
+const carXFrom=-9;
+function update3D(){
   const tc=clamp(T,0,TOTAL);
   const driving=T<0;
+  // car position
   let cx=0;
-  if(T<0) cx=lerp(-580,0,ease(seg(T,-3.2,0)));
-  else if(T>TOTAL) cx=lerp(0,640,ease(seg(T,TOTAL,TOTAL+2.6)));
-  carEl.setAttribute('transform',`translate(${cx},0)`);
-  reflect.setAttribute('transform',`translate(${cx},908) scale(1,-1)`);
+  if(T<0)cx=lerp(carXFrom,0,ease(seg(T,-3.2,0)));
+  else if(T>TOTAL)cx=lerp(0,10,ease(seg(T,TOTAL,TOTAL+2.6)));
+  if(G.car)G.car.position.x=cx;
+  // wheels spin
+  const spin=(driving?T*10:(T>TOTAL?T*10:tc*1.4));
+  if(G.wheels)G.wheels.forEach(w=>w.rotation.z=-spin);
 
-  const spin=driving? T*1500 : (T>TOTAL? T*1500 : 180+tc*70);
-  S('spokesF').setAttribute('transform',`rotate(${spin})`);
-  S('spokesR').setAttribute('transform',`rotate(${spin})`);
-
+  // clean fraction -> paint
   const c=cleanFraction(tc);
-  grimeSpots.forEach(g=>{g.el.style.opacity=(c>g.order)?0:g.el.dataset.o;});
-  tint.setAttribute('opacity',(1-c)*0.42);
-  S('bodyMain').style.filter=c>0.82?'brightness(1.14) saturate(1.18)':'none';
-  S('specHi').setAttribute('opacity',0.14+c*0.26);
-
-  // portal fx
-  const portalOn=T>=0&&T<=TOTAL;
-  S('portalWash').setAttribute('opacity',portalOn?0.6+0.3*Math.sin(T*4):0);
-  pl.querySelectorAll('circle').forEach((n,i)=>{const on=portalOn&&((Math.floor(T*3)+i)%3===0);n.setAttribute('fill',on?'#FFD21E':'#243052');});
-
-  // scan
-  const scanOn=tc>=0&&tc<=2.2;
-  S('scanGrid').setAttribute('opacity',scanOn?0.5:0);
-
-  // ion bar + particles + arcs
-  const ionI=tri(tc,2,5.2);
-  S('ionBar').setAttribute('opacity',ionI>0.02?1:0);
-  ionLayer.setAttribute('opacity',ionI);
-  ions.forEach(p=>{const up=((T*p.sp+p.ph)%1);p.el.setAttribute('cx',p.x);p.el.setAttribute('cy',p.y0-up*80);p.el.setAttribute('opacity',(1-up)*ionI);});
-  ionArcs.forEach(a=>{a.el.setAttribute('x1',a.x);a.el.setAttribute('y1',174);a.el.setAttribute('x2',a.x+rnd(-10,10));a.el.setAttribute('y2',rnd(320,400));a.el.setAttribute('opacity',(Math.random()<0.25?0.8:0)*ionI);});
-
-  // spray manifold
-  const mistI=tri(tc,4,8.3);
-  S('sprayRig').setAttribute('opacity',mistI>0.02?1:0);
-  sprayCones.setAttribute('opacity',mistI);
-  mistLayer.setAttribute('opacity',mistI>0.02?1:0);
-  mist.forEach(p=>{const f=((T*p.sp+p.ph)%1);p.el.setAttribute('cx',p.x);p.el.setAttribute('cy',190+f*230);p.el.setAttribute('opacity',(f<0.9?1:0)*mistI);});
-  // foam grows 4→8, wiped 8→15
-  let foamI=0;
-  if(tc>4&&tc<=8) foamI=seg(tc,4,8);
-  else if(tc>8&&tc<=15) foamI=1-seg(tc,8,15);
-  foam.setAttribute('opacity',foamI);
-  foamB.forEach(b=>{b.el.setAttribute('cx',b.x);b.el.setAttribute('cy',b.y+Math.sin(T*3+b.ph*6)*1.5);});
-
-  // textile
-  const texActive=tc>=6&&tc<=16.4;
-  const texIn=seg(tc,6,7.4), texOut=seg(tc,15,16.4);
-  const bob=Math.sin(T*11)*4, sway=Math.sin(T*7)*9;
-  S('roofRig').setAttribute('opacity',texActive?1:0);
-  const roofDrop=lerp(0,116,texIn)-texOut*116;
-  S('roofPad').setAttribute('transform',`translate(${sway},${roofDrop+bob})`);
-  S('roofPiston').setAttribute('height',60+roofDrop);
-  const padDx=lerp(0,92,texIn)-texOut*92;
-  S('padRigL').setAttribute('opacity',texActive?1:0);
-  S('padL').setAttribute('transform',`translate(${padDx},${bob})`);
-  S('rodL').setAttribute('width',60+padDx);
-  S('padRigR').setAttribute('opacity',texActive?1:0);
-  S('padR').setAttribute('transform',`translate(${-padDx},${bob})`);
-  S('rodR').setAttribute('x',818-padDx);S('rodR').setAttribute('width',60+padDx);
-
-  // air knives
-  const airI=tri(tc,12,20.3);
-  S('airKnifeL').setAttribute('opacity',airI>0.02?1:0);
-  S('airKnifeR').setAttribute('opacity',airI>0.02?1:0);
-  if(airI>0.02){
-    S('airConeL').setAttribute('points',`500,214 640,300 590,340`);
-    S('airConeR').setAttribute('points',`700,214 560,300 610,340`);
-    S('airConeL').setAttribute('opacity',0.5*airI);S('airConeR').setAttribute('opacity',0.5*airI);
+  if(G.paint){
+    const dirty=new THREE.Color(0x6b5a3a), clean=new THREE.Color(0x2f83e6);
+    G.paint.color.copy(dirty).lerp(clean,c);
+    G.paint.roughness=lerp(0.88,0.12,c);
+    G.paint.metalness=lerp(0.5,0.95,c);
   }
-  airLayer.setAttribute('opacity',airI>0.02?1:0);
-  airP.forEach(p=>{const f=((T*p.sp+p.ph)%1);const bx=p.side<0?470:690;p.el.setAttribute('cx',bx+p.side*f*230);p.el.setAttribute('cy',p.y-f*26);p.el.setAttribute('opacity',(1-f)*airI);});
-  // water sheet on car during 10–18
-  const sheetI=tri(tc,10,18);
-  S('sheet').setAttribute('opacity',sheetI*0.7);
-  sheetD.forEach(p=>{const f=((T*p.sp+p.ph)%1);p.el.setAttribute('cx',p.x);p.el.setAttribute('cy',320+f*115);p.el.setAttribute('opacity',(1-f)*sheetI*0.7);});
-  // steam
-  steamLayer.setAttribute('opacity',airI);
-  steam.forEach(p=>{const f=((T*p.sp+p.ph)%1);p.el.setAttribute('cx',p.x+Math.sin(f*6+p.ph*6)*10);p.el.setAttribute('cy',300-f*120);p.el.setAttribute('opacity',(1-f)*airI*0.4);});
+  // portal glow
+  const portalOn=T>=0&&T<=TOTAL;
+  G.portalLight.intensity=portalOn?0.8+0.5*Math.sin(T*4):0;
+  G.portalRing.material.emissiveIntensity=portalOn?0.5+0.4*Math.sin(T*4):0;
+  G.leds.forEach((m,i)=>{const on=portalOn&&((Math.floor(T*3)+i)%3===0);m.material.emissive.setHex(on?0xFFD21E:0x000000);});
 
-  // gloss arm
+  // scan (glow ring pulse handled) — flash ring cyan
+  // ion
+  const ionI=tri(tc,2,5.2);
+  G.ionBar.material.emissiveIntensity=ionI*1.4;
+  updatePts(G.ion,ionI,(i,s)=>{const up=((T*(0.6+s.a)+s.b)%1);return [lerp(-2,2,s.c),0.9+up*1.6,lerp(-0.9,0.9,s.d)];},ionI);
+  // mist
+  const mistI=tri(tc,4,8.3);
+  updatePts(G.mist,mistI,(i,s)=>{const f=((T*(1+s.a)+s.b)%1);return [lerp(-1.8,1.8,s.c),3.8-f*2.6,lerp(-0.9,0.9,s.d)];},mistI);
+  // foam on car 4-8 build, 8-15 wiped
+  let foamI=0; if(tc>4&&tc<=8)foamI=seg(tc,4,8); else if(tc>8&&tc<=15)foamI=1-seg(tc,8,15);
+  updatePts(G.foam,foamI,(i,s)=>{return [lerp(-2,2,s.c),lerp(1.0,2.1,s.a),lerp(-0.95,0.95,s.d)];},foamI*0.95);
+  // textile
+  const texActive=tc>=6&&tc<=16.4, texIn=seg(tc,6,7.4), texOut=seg(tc,15,16.4);
+  const bob=Math.sin(T*11)*0.06;
+  if(G.roofPad){G.roofPad.visible=texActive;const y=lerp(5,2.55,texIn)-texOut*2.45;G.roofPad.position.y=y+bob;G.roofPad.position.x=Math.sin(T*6)*0.15;}
+  G.sidePads.forEach(sp=>{sp.grp.visible=texActive;const z=lerp(sp.zs*3.0,sp.zs*1.15,texIn)+ (texOut*sp.zs*1.85);sp.grp.position.z=z;sp.roller.rotation.y+=0.3;});
+  // air
+  const airI=tri(tc,12,20.3);
+  G.airKnives.forEach(ak=>ak.u.visible=airI>0.02);
+  updatePts(G.air,airI,(i,s)=>{const f=((T*(1.3+s.a)+s.b)%1);const side=s.c<0.5?-1:1;return [lerp(-1.5,1.5,s.d),lerp(2.2,1.0,f),side*(0.9+f*2.2)];},airI);
+  // gloss
   const glossOn=tc>=20.6&&tc<=24;
-  S('glossArm').setAttribute('opacity',glossOn?1:0);
-  if(glossOn){const a=lerp(-30,30,seg(tc,21,24));S('armSeg').setAttribute('transform',`rotate(${a} 599 170)`);}
+  if(G.glossArm){G.glossArm.visible=glossOn;const a=lerp(-0.5,0.5,seg(tc,21,24));G.glossArm.rotation.z=a;G.glossArm.position.y=glossOn?lerp(5.6,4.4,seg(tc,20.6,21.4)):5.6;}
   const glossI=seg(tc,21,24);
-  const gb=S('glossSweep');gb.setAttribute('opacity',tc>=21&&tc<=24?0.9:0);gb.setAttribute('x',lerp(370,700,glossI));
-  S('sparkle').setAttribute('opacity',tc>22?(0.4+0.6*Math.abs(Math.sin(T*8))):0);
+  updatePts(G.spark,tc>22?1:0,(i,s)=>{return [lerp(-2,2,s.a),lerp(1.0,2.2,s.b),lerp(-0.95,0.95,s.c)];},tc>22?(0.4+0.6*Math.abs(Math.sin(T*8))):0);
 
   // ---- HUD ----
   S('tSec').textContent=(T<0?0:tc).toFixed(1);
@@ -600,36 +406,40 @@ function render(){
   S('cqsRing').setAttribute('stroke-dashoffset',150.8*(1-clamp(cqs/100,0,1)));
   S('kWater').textContent=Math.round(seg(tc,4,8)*460)+' ml';
   S('kDust').textContent=Math.round(c*100)+'%';
-
-  let active=null; M.forEach(m=>{if(tc>=m.s&&tc<=m.e)active=m;});
+  let active=null;M.forEach(m=>{if(tc>=m.s&&tc<=m.e)active=m;});
   M.forEach(m=>{const on=tc>=m.s&&tc<=m.e;
     S('lab_'+m.k).classList.toggle('on',on);S('span_'+m.k).classList.toggle('on',on);
     S('fill_'+m.k).style.width=(seg(tc,m.s,m.e)*(m.e-m.s)/TOTAL*100)+'%';
-    const ml=S('ml_'+m.k);ml.classList.toggle('on',on);ml.querySelector('.led').style.background=on?m.col:'#243052';
-    ml.querySelector('.led').style.boxShadow=on?`0 0 8px ${m.col}`:'none';
-  });
+    const ml=S('ml_'+m.k);ml.classList.toggle('on',on);const led=ml.querySelector('.led');led.style.background=on?m.col:'#243052';led.style.boxShadow=on?`0 0 8px ${m.col}`:'none';});
   let now='System idle';
-  if(T<0) now='🚗 Vehicle entering portal…';
-  else if(T>TOTAL) now='✅ Photo-ready — exiting portal';
-  else if(active) now='● '+active.name+' active';
+  if(T<0)now='🚗 Vehicle entering portal…';else if(T>TOTAL)now='✅ Photo-ready — exiting portal';else if(active)now='● '+active.name+' active';
   S('tNow').textContent=now;
-
   const ph=S('playhead');
   if(portalOn){ph.style.opacity=1;ph.style.left=`calc(150px + 12px + ${tc/TOTAL} * (100% - 150px - 12px - 18px))`;}else ph.style.opacity=0;
   S('tlPct').textContent=Math.round(tc/TOTAL*100)+'%';
-
-  const cap=S('stageCaption');
-  if(T<0){cap.textContent='Dirty vehicle entering the Surface Reset Portal…';cap.setAttribute('fill','#93A0C4');}
-  else if(T>TOTAL){cap.textContent='24 seconds — clean · glossy · protected. Ready for the 360° photo studio.';cap.setAttribute('fill','#FFD21E');}
-  else{cap.textContent=active?active.name+' — every surface treated at once':'Cleaning field active';cap.setAttribute('fill','#93A0C4');}
 }
 
-function frame(now){
-  const dt=(now-last)/1000; last=now;
+function updatePts(P,vis,fn,opacity){
+  if(!P)return;
+  P.pts.visible=vis>0.02;
+  if(vis<=0.02)return;
+  for(let i=0;i<P.n;i++){const s=G.seed[i%G.seed.length];const [x,y,z]=fn(i,s);P.pos[i*3]=x;P.pos[i*3+1]=y;P.pos[i*3+2]=z;}
+  P.geo.attributes.position.needsUpdate=true;
+  P.pts.material.opacity=clamp(opacity,0,1);
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const now=performance.now(); const dt=(now-lastMs)/1000; lastMs=now;
   if(playing){T+=dt*speed; if(T>TOTAL+2.6){T=TOTAL+2.6;playing=false;done=true;S('go').textContent='↻ Run again';S('go').onclick=reset;}}
-  render(); requestAnimationFrame(frame);
+  update3D();
+  controls.update();
+  renderer.render(scene,camera);
 }
-render(); requestAnimationFrame(frame);
+
+// boot
+try{ build3D(); animate(); }
+catch(e){ S('loading').textContent='3D engine failed to load — check connection.'; console.error(e); }
 </script>
 </body>
 </html>

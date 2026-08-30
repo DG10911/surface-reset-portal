@@ -51,6 +51,7 @@
   .ml{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);transition:.2s}
   .ml .led{width:8px;height:8px;border-radius:50%;background:#243052;transition:.2s}.ml.on{color:#fff}
   .vs{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.5}.vs b{color:var(--yellow)}
+  .cost{margin-top:8px;font-size:11px;color:var(--muted);background:#0d1430;border:1px solid var(--line);border-radius:9px;padding:7px 9px;line-height:1.5}.cost b{color:#EAF0FF}
   .controls{position:absolute;left:16px;bottom:16px;display:flex;gap:10px;align-items:center}
   button{font:inherit;cursor:pointer;border:none;border-radius:12px;padding:12px 20px;font-weight:800}
   .btn-go{background:linear-gradient(180deg,var(--yellow),var(--yellowD));color:#0A0E1A;box-shadow:0 10px 28px rgba(255,210,30,.4)}
@@ -100,10 +101,11 @@
         </svg>
         <div><div class="val" id="cqsVal">0</div><div class="lab">Cleaning Score<br/>CQS · target ≥100</div></div>
       </div>
-      <div class="gauges"><div class="kpi"><b id="kWater">0 ml</b><span>Water used</span></div>
+      <div class="gauges"><div class="kpi"><b id="kWater">0 L</b><span>Rinse water</span></div>
         <div class="kpi"><b id="kDust">0%</b><span>Dust cleared</span></div></div>
+      <div class="cost">Capex target <b>₹15–20L</b>/portal · <b>~90s</b>/car · <b>35–40</b> cars/hr</div>
       <div class="modlights" id="modlights"></div>
-      <div class="vs">Manual expert <b>4:00</b> → Portal <b>0:24</b> = <b>10× faster</b></div>
+      <div class="vs">Manual expert <b>4:00</b> → Portal <b>0:24</b> = <b>10× faster</b> · <b>0 L</b> rinse water</div>
     </div>
     <div class="controls">
       <button class="btn-go" id="go">▶ START CLEANING</button>
@@ -133,9 +135,9 @@ const M=[
  {k:'air',s:12,e:20,name:'Air-knife extract',col:'#FBBF24'},{k:'gloss',s:21,e:24,name:'Gloss + protect',col:'#F472B6'}];
 const TOTAL=24;
 const DESC={
- scan:'AI cameras 3D-map the car and detect dirt zones — the portal cleans only what is actually dirty.',
+ scan:'AI cameras 3D-map the car and detect dirt zones — cleans only what is dirty. Triage: heavily soiled / monsoon cars are routed to a 60s pre-cycle, so the 24s promise never breaks.',
  ion:'An ionised-air bar neutralises static charge so dust releases from the paint before anything touches it.',
- mist:'A fine rinseless-polymer mist encapsulates & lubricates the grime — under 500 ml of water per car.',
+ mist:'A fine rinseless-polymer mist encapsulates & lubricates the grime — under 2 L total liquid, zero rinse water, no drainage needed.',
  tex:'Soft foam brushes wrap the roof, both sides and the wheels at once — parallel contact is the 10× speed-up.',
  air:'High-velocity air-knife sheets blast off the water and residue instantly — no drying tunnel needed.',
  gloss:'A robot arm lays a thin SiO₂ gloss coat — showroom shine plus days of dirt resistance in dusty India.'
@@ -517,7 +519,7 @@ function update3D(){
   S('tSec').textContent=(T<0?0:tc).toFixed(1);
   const cqs=Math.round(c*100+glossI*4);S('cqsVal').textContent=Math.min(104,cqs);
   S('cqsRing').setAttribute('stroke-dashoffset',150.8*(1-clamp(cqs/100,0,1)));
-  S('kWater').textContent=Math.round(seg(tc,4,8)*460)+' ml';S('kDust').textContent=Math.round(c*100)+'%';
+  S('kWater').textContent='0 L';S('kDust').textContent=Math.round(c*100)+'%';
   let active=null;M.forEach(m=>{if(tc>=m.s&&tc<=m.e)active=m;});
   M.forEach(m=>{const on=tc>=m.s&&tc<=m.e;S('lab_'+m.k).classList.toggle('on',on);S('span_'+m.k).classList.toggle('on',on);
     S('fill_'+m.k).style.width=(seg(tc,m.s,m.e)*(m.e-m.s)/TOTAL*100)+'%';

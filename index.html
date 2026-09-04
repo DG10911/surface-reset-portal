@@ -1510,6 +1510,31 @@
   </div>
 
   <!-- Libraries: local copies first so the demo never depends on venue Wi-Fi -->
+  <!-- CARS24 SHOWCASE — one calm boardroom screen (reuses the live engine) -->
+  <button id="scLaunch" title="Cars24 showcase view">◇ Showcase</button>
+  <div id="showcase" aria-hidden="true">
+    <div class="sc-top">
+      <div class="sc-brand"><span class="c24b">CARS24</span><span>Surface Reset Portal</span></div>
+      <div class="sc-timer"><b id="scT">0.0</b><span>/ 22.6s</span></div>
+      <div class="sc-now" id="scStation">Ready — press Start</div>
+      <button class="sc-exit" id="scExit">✕ Exit</button>
+    </div>
+    <div class="sc-steps" id="scSteps"></div>
+    <aside class="sc-quality">
+      <div class="sc-qhead">Quality · live inspection</div>
+      <div class="sc-cqs"><b id="scCqs">—</b><span>CQS<br/>target ≥100</span></div>
+      <div id="scZones"></div>
+      <div class="sc-modeltag">Simulation estimate</div>
+    </aside>
+    <div class="sc-kpis">
+      <div><b>22.6s</b><span>per car · 10× vs manual</span></div>
+      <div><b>0 L</b><span>rinse · &lt;2 L total</span></div>
+      <div><b>40/hr</b><span>~90s door-to-door</span></div>
+      <div><b>₹18.5L</b><span>capex · ~8-mo payback</span></div>
+    </div>
+    <button class="sc-start" id="scStart">▶ Start clean cycle</button>
+  </div>
+
   <script src="js/vendor/three.min.js"></script>
   <script src="js/vendor/gsap.min.js"></script>
   <script src="js/fx.js"></script>

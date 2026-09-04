@@ -187,7 +187,7 @@ body.running #timerHud::after{opacity:1;animation:spinBeam 2.8s linear infinite}
 }
 #intro.hide{opacity:0;pointer-events:none;visibility:hidden}
 #intro .kicker{font-family:var(--font-d);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--yellow);margin:0 0 8px}
-#intro h1{font-family:var(--font-d);font-size:48px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin:0;line-height:0.95}
+#intro h1{font-family:var(--font-d);font-size:clamp(30px,4vw,48px);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin:0;line-height:0.95}
 #intro p{margin:10px 0 0;max-width:460px;color:var(--ink-2);font-size:14px;line-height:1.5}
 
 /* engineering overlay labels */
@@ -204,7 +204,7 @@ body.running #timerHud::after{opacity:1;animation:spinBeam 2.8s linear infinite}
 #doneCard .inner{width:min(480px,90%);background:var(--panel);border:1px solid var(--line-2);padding:28px 28px 22px;transform:translateY(8px);opacity:0;transition:transform .28s var(--ease),opacity .28s var(--ease)}
 #doneCard.on .inner{transform:none;opacity:1}
 #doneCard .kicker{font-family:var(--font-d);letter-spacing:.2em;text-transform:uppercase;color:var(--live);font-size:12px;margin:0 0 6px}
-#doneCard h2{font-family:var(--font-d);font-size:42px;margin:0;letter-spacing:.04em;text-transform:uppercase;line-height:1}
+#doneCard h2{font-family:var(--font-d);font-size:clamp(28px,3.6vw,42px);margin:0;letter-spacing:.04em;text-transform:uppercase;line-height:1}
 #doneCard .sub{font-family:var(--font-d);font-size:18px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin:6px 0 18px}
 .qgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:16px}
 .qgrid div{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:8px}
@@ -930,3 +930,11 @@ table.data tbody tr:hover{
   background:rgba(243,240,232,.03);
 }
 
+
+/* jury-fix: stop timer digit jitter */
+#bt,#fvTime,#stTime,#liveTape,#roiPay,#payV,#roiPay2{font-variant-numeric:tabular-nums}
+
+/* jury-fix: permanent scope clarifier under the field viz */
+.fv-scope{margin:8px 0 0;font-family:var(--font-m);font-size:10px;line-height:1.5;color:var(--muted);
+  border-top:1px dashed var(--line);padding-top:7px;letter-spacing:.02em}
+.fv-scope b{color:var(--ink)}

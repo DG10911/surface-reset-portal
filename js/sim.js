@@ -1473,7 +1473,7 @@ function APP() {
     const pane = { simulation: 'paneSim', cameras: 'paneCam', twin: 'paneTwin', engineering: 'paneEng' }[p] || 'paneSim';
     document.querySelectorAll('.rail-pane').forEach(x => x.classList.toggle('on', x.id === pane));
     $('railTitle').textContent = ({ simulation: 'Live modules', cameras: 'Camera bank', twin: 'Digital twin', engineering: 'Engineering' }[p] || 'Live modules');
-    $('railSub').textContent = p === 'twin' ? 'controller graph' : p === 'cameras' ? '14 viewpoints' : p === 'engineering' ? 'envelope' : p === 'modules' ? '6 cleaning stages' : 'overlapped';
+    $('railSub').textContent = p === 'twin' ? 'controller graph' : p === 'cameras' ? (CAMS.length + ' viewpoints') : p === 'engineering' ? 'envelope' : p === 'modules' ? '6 cleaning stages' : 'overlapped';
     if (p === 'engineering') { engineering = true; setToggle($('engTog'), true); $('engLabels').hidden = false; engGroup.visible = true; }
     if (p === 'analytics') drawAllCharts();
     if (p === 'quality') renderQcFull();
@@ -2221,7 +2221,7 @@ function APP() {
 
   /* keyboard */
   addEventListener('keydown', e => {
-    if (e.target.matches('input,textarea')) return;
+    if (e.target instanceof Element && e.target.matches('input,textarea,select,button')) return;
     if (e.code === 'Space') { e.preventDefault(); if (flow === 'idle') startFlow(); else togglePause(); }
     if (e.key === 'r' || e.key === 'R') resetFlow();
     if (e.key === 'e' || e.key === 'E') $('engTog').click();
@@ -2344,6 +2344,15 @@ function APP() {
             if ($('baPct')) setBa(true);
             cqsHist.push(100 + rnd(0, 2.4));
             $('stCount').textContent = pad(carsToday, 3);
+            /* live-ify Ops (modelled): polymer drains, queue drifts, shift/processed climb */
+            (function () {
+              var poly = $('alPoly');
+              if (poly) { var ps = poly.querySelector('span'); var pv = Math.max(6, (parseInt(ps.textContent) || 18) - 2);
+                ps.textContent = 'Reserve ' + pv + '% · ' + (pv < 12 ? 'reorder now' : 'reorder this shift'); }
+              var q = $('opsQ'); if (q) q.textContent = Math.max(0, (parseInt(q.textContent) || 4) - 1 + (Math.random() < 0.5 ? 1 : 0));
+              var sh = $('opsShift'); if (sh) sh.textContent = (parseInt(sh.textContent) || 127) + 1;
+              var pr = $('opsProc'); if (pr) pr.textContent = carsToday;
+            })();
             lastReport = {
               zones: QZONES.map(() => 98 + Math.random() * 2),
               cqs: Math.round(100 + rnd(0, 2.4)),

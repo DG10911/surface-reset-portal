@@ -171,7 +171,7 @@
       <canvas id="c3d"></canvas>
       <div id="offline">
         <b>3D engine unavailable</b>
-        <span>The three.js CDN could not be reached. Reconnect and reload — this twin runs fully in-browser.</span>
+        <span>3D engine failed to start — reload the page. This twin runs fully in-browser, no network needed.</span>
       </div>
       <div class="bracket tl"></div>
       <div class="bracket tr"></div>
@@ -244,6 +244,8 @@
           <i></i>
           <span>Parallel · <b>22.6 s</b></span>
         </div>
+        <p class="fv-scope">22.6&nbsp;s in-portal process · ~90&nbsp;s door-to-door incl. convey + QC · heavy-soil +60&nbsp;s
+          pre-cycle (~12% of intake, modelled)</p>
       </div>
       <div id="splitReveal">
         <div class="split-inner" style="position:relative">
@@ -252,9 +254,9 @@
           <span class="sim-tag">Studio Inspection</span>
           <p class="kicker">Before / After · Surface Reset Comparison</p>
           <div class="split-stage" id="splitStage">
-            <img id="splitBefore" alt="Inbound dirty vehicle" />
+            <img id="splitBefore" alt="Inbound dirty vehicle" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='9'%3E%3Crect%20width='16'%20height='9'%20fill='%230a0b0d'/%3E%3C/svg%3E" />
             <div class="split-after" id="splitAfterWrap">
-              <img id="splitAfter" alt="Outbound clean vehicle" />
+              <img id="splitAfter" alt="Outbound clean vehicle" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='9'%3E%3Crect%20width='16'%20height='9'%20fill='%230a0b0d'/%3E%3C/svg%3E" />
             </div>
             <div class="split-handle" id="splitHandle"><b></b></div>
             <span class="split-l">BEFORE · 84% SOIL · 58 GU</span>
@@ -683,7 +685,7 @@
             <input type="range" id="roiCpd" aria-label="Cars per day" min="30" max="120" value="60"
               style="width:100%;accent-color:var(--orange)" />
             <div style="display:flex;justify-content:space-between;font-family:var(--font-m);font-size:12px"><span
-                id="roiCpdV">60 cars/day</span><b id="roiPay2">— months</b></div>
+                id="roiCpdV">60 cars/day</span><b id="roiPay2">8.0 months</b></div>
           </div>
           <div class="panel">
             <h3>200-hub network · modelled</h3>
@@ -925,7 +927,7 @@
             <input type="range" id="cpd" aria-label="Cars per day" min="30" max="120" value="60"
               style="width:100%;accent-color:var(--orange);margin-top:8px" />
             <div style="display:flex;justify-content:space-between;font-family:var(--font-m);font-size:12px"><span
-                id="cpdV">60 cars/day</span><b id="payV">— months</b></div>
+                id="cpdV">60 cars/day</span><b id="payV">8.0 months</b></div>
           </div>
         </div>
       </article>
@@ -958,7 +960,7 @@
           </div>
           <div>
             <div class="k">Uptime target</div>
-            <div class="v">99.2%</div>
+            <div class="v">99.5%</div>
             <div class="h">design case</div>
           </div>
         </div>
@@ -1036,8 +1038,9 @@
           <div class="panel">
             <h3>Scan demo — dirt triage</h3>
             <p style="font-size:12px;color:var(--ink-2);margin:0 0 10px">Point a webcam at a surface or upload a panel
-              photo. Zones classify by luminance deviation — the same logic that routes standard cars to 22.6s and heavy
-              soil to a 60s pre-cycle.</p>
+              photo. This is an <b>illustrative luminance demo</b>, not soil metrology — it shows how a per-panel
+              soil index would route standard cars to the 22.6&nbsp;s program and heavy soil to a 60&nbsp;s pre-cycle.
+              Production uses gravimetric / image-based soil sensing.</p>
             <div class="ctrl-row" style="margin-bottom:10px">
               <button class="btn btn-run" id="camStart">Start webcam</button>
               <button class="btn" id="upBtn">Upload photo</button>
@@ -1046,7 +1049,7 @@
             </div>
             <div id="feedWrap">
               <video id="vid" autoplay playsinline muted></video>
-              <img id="scanImg" alt="" hidden />
+              <img id="scanImg" alt="Analyzed camera frame" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='9'%3E%3Crect%20width='16'%20height='9'%20fill='%230a0b0d'/%3E%3C/svg%3E" hidden />
               <div id="gridOv"></div>
             </div>
             <div id="verdict">Awaiting frame…</div>
@@ -1509,10 +1512,6 @@
   <!-- Libraries: local copies first so the demo never depends on venue Wi-Fi -->
   <script src="js/vendor/three.min.js"></script>
   <script src="js/vendor/gsap.min.js"></script>
-  <script>
-    if (!window.THREE) document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
-    if (!window.gsap)  document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"><\/script>');
-  </script>
   <script src="js/fx.js"></script>
   <script src="js/sim.js"></script>
   <script src="js/enhance.js"></script>

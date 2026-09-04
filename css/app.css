@@ -1007,3 +1007,31 @@ body.showcase #showcase{display:block;position:fixed;inset:0;z-index:55;pointer-
   .sc-kpis{grid-template-columns:1fr 1fr;max-width:56%}
   .sc-steps{bottom:150px;flex-wrap:wrap;justify-content:center;max-width:92%}
 }
+
+/* Showcase morphing panel states */
+.sc-lede{font-family:var(--font-d);font-size:17px;line-height:1.35;margin:6px 0 8px;color:#fff}
+.sc-sub{font-size:12px;color:var(--muted);line-height:1.5;margin:0}
+.sc-bul{list-style:none;margin:6px 0 0;padding:0}
+.sc-bul li{font-size:11.5px;color:#d5d9e0;line-height:1.5;padding:5px 0 5px 16px;position:relative;border-bottom:1px solid var(--line)}
+.sc-bul li:before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:#8fb7ff}
+.sc-verdict{margin-top:12px;font-family:var(--font-m);font-size:12px;font-weight:600;color:#0b0c0e;background:#2EE59D;
+  border-radius:8px;padding:8px 11px;text-align:center;letter-spacing:.03em}
+.sc-big{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 12px}
+.sc-big>div:first-child{grid-column:1/-1}
+.sc-big b{display:block;font-family:var(--font-m);font-size:26px;font-weight:700;line-height:1}
+.sc-big span{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.sc-mbar{display:grid;grid-template-columns:78px 1fr 54px;gap:8px;align-items:center;margin-bottom:9px;font-family:var(--font-m);font-size:10.5px}
+.sc-mbar>span{color:var(--muted)}
+.sc-mbar .t{height:8px;background:#151a22;border-radius:5px;overflow:hidden}
+.sc-mbar .t i{display:block;height:100%;background:linear-gradient(90deg,#FF8A3D,#FFD200);transition:width .3s}
+.sc-mbar b{text-align:right}
+.sc-slip{font-family:var(--font-m);font-size:11px;line-height:1.7;background:#0c0e12;border:1px solid var(--line-2);border-radius:12px;padding:13px}
+.sc-slip b{display:block;font-family:var(--font-d);font-size:16px;color:#2EE59D;margin-bottom:6px;letter-spacing:.03em}
+.sc-slip>div{color:#cfd3da}
+.sc-model2{display:inline-block;margin-top:8px;font-size:9px;letter-spacing:.12em;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:3px 7px}
+.sc-copy{width:100%;margin-top:11px;background:#FFD200;color:#0b0c0e;border:none;border-radius:10px;padding:11px;
+  font-family:var(--font-d);font-weight:800;font-size:13px;letter-spacing:.03em;cursor:pointer}
+/* under-5s heartbeat on the timer */
+#showcase.pulse .sc-timer b{animation:scPulse .9s ease-in-out infinite;color:#FFD200}
+@keyframes scPulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.09);opacity:1}}
+@media(prefers-reduced-motion:reduce){#showcase.pulse .sc-timer b{animation:none}}

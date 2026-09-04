@@ -76,7 +76,67 @@
   launch.onclick = enter;
   $('scExit').onclick = exit;
   $('scStart').onclick = function () { window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space', key: ' ', bubbles: true })); };
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.body.classList.contains('showcase')) exit(); });
+
+  /* cam director strip -> dispatch the engine's cam hotkeys (1 hero,2 follow,3 portal,5 drone) */
+  sc.querySelectorAll('#scCams button').forEach(function (b) {
+    b.onclick = function () {
+      sc.querySelectorAll('#scCams button').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: b.dataset.k, code: 'Digit' + b.dataset.k, bubbles: true }));
+    };
+  });
+  /* transport buttons -> click the real controls */
+  sc.querySelectorAll('[data-ctl]').forEach(function (b) {
+    b.onclick = function () { var t = $(b.dataset.ctl); if (t) t.click(); };
+  });
+  /* speed + vehicle segmented -> build + click real seg children */
+  sc.querySelectorAll('.sc-seg').forEach(function (seg) {
+    var vals = seg.dataset.vals.split(','); var real = $(seg.dataset.seg);
+    vals.forEach(function (v, i) {
+      var bb = document.createElement('button');
+      bb.textContent = (seg.dataset.seg === 'spdSeg' ? v + '×' : v);
+      if (v === seg.dataset.def) bb.classList.add('on');
+      bb.onclick = function () {
+        seg.querySelectorAll('button').forEach(function (x) { x.classList.remove('on'); }); bb.classList.add('on');
+        if (real && real.children[i]) real.children[i].click();
+      };
+      seg.appendChild(bb);
+    });
+  });
+  /* JUMP dots mirror the real jury-Q&A jump buttons */
+  document.querySelectorAll('#jumpBar button[data-jump]').forEach(function (rj) {
+    var b = document.createElement('button'); b.textContent = rj.dataset.jump + 's';
+    b.title = (rj.textContent || '').trim(); b.onclick = function () { rj.click(); };
+    $('scJumps').appendChild(b);
+  });
+  /* "More" drawer -> every view reachable in <=2 clicks */
+  var PAGES = [['modules', 'Modules'], ['dashboard', 'Ops console'], ['fleet', 'Fleet · 200 hubs'], ['roi', 'Business case'],
+    ['analytics', 'Analytics'], ['quality', 'Quality / QC'], ['cameras', 'Cameras'], ['engineering', 'Engineering'],
+    ['log', 'System log'], ['maintenance', 'Maintenance'], ['settings', 'Settings']];
+  var grid = $('scDrawerGrid');
+  PAGES.forEach(function (p) {
+    var b = document.createElement('button'); b.textContent = p[1];
+    b.onclick = function () {
+      var nav = document.querySelector('#nav .nv[data-page="' + p[0] + '"]'); if (nav) nav.click();
+      document.body.classList.add('drawer'); $('scDrawer').hidden = true;
+    };
+    grid.appendChild(b);
+  });
+  function closeDrawer() {
+    $('scDrawer').hidden = true; document.body.classList.remove('drawer');
+    var nav = document.querySelector('#nav .nv[data-page="simulation"]'); if (nav) nav.click();
+  }
+  $('scMore').onclick = function () { $('scDrawer').hidden = false; };
+  $('scDrawerClose').onclick = closeDrawer;
+  /* single Esc: close drawer/page first, else leave showcase */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || !document.body.classList.contains('showcase')) return;
+    if (document.body.classList.contains('drawer')) { closeDrawer(); return; }
+    if (!$('scDrawer').hidden) { $('scDrawer').hidden = true; return; }
+    exit();
+  });
+  /* cockpit is the default landing */
+  window.addEventListener('load', function () { setTimeout(enter, 400); });
 
   /* helpers to read live engine state (mirror, no coupling) */
   function secs() { var b = $('bt'); if (!b) return 0; var p = b.textContent.split('.'); return (+p[0] || 0) + (+('0.' + (p[1] || 0)) || 0); }

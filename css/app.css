@@ -967,7 +967,7 @@ body.showcase #showcase{display:block;position:fixed;inset:0;z-index:55;pointer-
 .sc-exit{margin-left:auto;pointer-events:auto;background:rgba(20,24,30,.8);border:1px solid var(--line-2);
   color:#fff;border-radius:10px;padding:9px 15px;font-weight:700;cursor:pointer}
 /* 6-station stepper */
-.sc-steps{position:absolute;left:50%;transform:translateX(-50%);bottom:104px;display:flex;gap:10px;
+.sc-steps{position:absolute;left:50%;transform:translateX(-50%);bottom:158px;display:flex;gap:10px;
   background:rgba(8,10,13,.66);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
 .sc-step{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:88px;opacity:.42;transition:.25s}
 .sc-step.on{opacity:1}
@@ -1035,3 +1035,44 @@ body.showcase #showcase{display:block;position:fixed;inset:0;z-index:55;pointer-
 #showcase.pulse .sc-timer b{animation:scPulse .9s ease-in-out infinite;color:#FFD200}
 @keyframes scPulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.09);opacity:1}}
 @media(prefers-reduced-motion:reduce){#showcase.pulse .sc-timer b{animation:none}}
+
+/* Showcase cockpit — cam strip, transport, drawer */
+.sc-cams{display:flex;align-items:center;gap:4px;margin-left:6px;background:rgba(8,10,13,.6);border:1px solid var(--line);
+  border-radius:10px;padding:4px;pointer-events:auto}
+.sc-cams button{background:transparent;border:none;color:var(--muted);font-family:var(--font-d);font-size:11px;font-weight:700;
+  letter-spacing:.04em;padding:6px 10px;border-radius:7px;cursor:pointer}
+.sc-cams button.on{background:#1b2330;color:#fff}
+.sc-free{font-size:9.5px;color:var(--muted);padding:0 8px;font-family:var(--font-m)}
+.sc-drawerbtn{pointer-events:auto;background:rgba(20,24,30,.8);border:1px solid var(--line-2);color:#fff;border-radius:10px;
+  padding:9px 14px;font-weight:700;cursor:pointer;font-family:var(--font-d);letter-spacing:.03em}
+.sc-transport{position:absolute;left:50%;transform:translateX(-50%);bottom:52px;display:flex;align-items:center;gap:7px;
+  background:rgba(8,10,13,.74);backdrop-filter:blur(12px);border:1px solid var(--line-2);border-radius:14px;padding:8px 12px;
+  pointer-events:auto;max-width:94vw;flex-wrap:wrap;justify-content:center}
+.sc-transport button{background:#141a24;border:1px solid var(--line);color:#e6e9ef;font-family:var(--font-d);font-weight:700;
+  font-size:12px;letter-spacing:.03em;border-radius:9px;padding:9px 13px;cursor:pointer}
+.sc-transport .sc-start{background:linear-gradient(180deg,#FFD200,#F5A300);color:#0b0c0e;border:none;box-shadow:0 6px 18px rgba(245,163,0,.35)}
+.sc-transport .sc-estop{background:#7f1d1d;color:#ffd9d9;border-color:#a33}
+.sc-div{width:1px;height:22px;background:var(--line-2)}
+.sc-seg{display:flex;gap:2px;background:#0d1220;border:1px solid var(--line);border-radius:9px;padding:2px}
+.sc-seg button{background:transparent;border:none;color:var(--muted);font-family:var(--font-m);font-size:11px;padding:6px 9px;border-radius:7px;cursor:pointer}
+.sc-seg button.on{background:#FFD200;color:#0b0c0e;font-weight:700}
+.sc-jumps{display:flex;gap:3px}
+.sc-jumps button{background:#0d1220;border:1px solid var(--line);color:var(--muted);font-family:var(--font-m);font-size:10px;padding:6px 8px;border-radius:7px;cursor:pointer}
+.sc-jumps button:hover{color:#fff;border-color:var(--line-2)}
+.sc-scope{position:absolute;left:50%;transform:translateX(-50%);bottom:16px;font-family:var(--font-m);font-size:10px;color:var(--muted);pointer-events:none}
+.sc-scope b{color:var(--ink)}
+/* drawer overlay */
+.sc-drawer{position:absolute;top:0;right:0;bottom:0;width:340px;background:rgba(9,11,15,.94);backdrop-filter:blur(14px);
+  border-left:1px solid var(--line-2);z-index:70;pointer-events:auto;padding:16px;overflow:auto;box-shadow:-20px 0 60px rgba(0,0,0,.5)}
+.sc-drawer[hidden]{display:none}
+.sc-drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.sc-drawer-head b{font-family:var(--font-d);font-size:15px;letter-spacing:.03em}
+.sc-drawer-head button{background:transparent;border:1px solid var(--line-2);color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer}
+.sc-drawer-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sc-drawer-grid button{background:#111722;border:1px solid var(--line);color:#e6e9ef;font-family:var(--font-d);font-weight:700;
+  font-size:12px;letter-spacing:.03em;border-radius:10px;padding:14px 10px;cursor:pointer;text-align:left}
+.sc-drawer-grid button:hover{border-color:var(--line-2);background:#161d2a}
+/* when a drawer/page overlay is open, reveal #views over the showcase */
+body.showcase.drawer #views{display:block!important;position:fixed;inset:52px 340px auto 0;z-index:65;pointer-events:auto;
+  overflow:auto;max-height:calc(100vh - 120px)}
+@media(max-width:900px){.sc-transport{bottom:70px}.sc-drawer{width:100%}}

@@ -1517,6 +1517,11 @@
       <div class="sc-brand"><span class="c24b">CARS24</span><span>Surface Reset Portal</span></div>
       <div class="sc-timer"><b id="scT">0.0</b><span>/ 22.6s</span></div>
       <div class="sc-now" id="scStation">Ready — press Start</div>
+      <div class="sc-cams" id="scCams">
+        <button data-k="2" class="on">Follow</button><button data-k="5">Drone</button>
+        <button data-k="3">Portal</button><button data-k="1">Hero</button><span class="sc-free">drag = free orbit</span>
+      </div>
+      <button class="sc-drawerbtn" id="scMore">⋯ More</button>
       <button class="sc-exit" id="scExit">✕ Exit</button>
     </div>
     <div class="sc-steps" id="scSteps"></div>
@@ -1527,7 +1532,23 @@
       <div><b>40/hr</b><span>~90s door-to-door</span></div>
       <div><b>₹18.5L</b><span>capex · ~8-mo payback</span></div>
     </div>
-    <button class="sc-start" id="scStart">▶ Start clean cycle</button>
+    <div class="sc-transport">
+      <button class="sc-start" id="scStart">▶ Start</button>
+      <button data-ctl="pauseBtn">Pause</button>
+      <button data-ctl="replayBtn">Replay</button>
+      <button data-ctl="resetBtn">Reset</button>
+      <button data-ctl="estopBtn" class="sc-estop">E-Stop</button>
+      <span class="sc-div"></span>
+      <div class="sc-seg" data-seg="spdSeg" data-vals="0.5,1,2" data-def="1"></div>
+      <div class="sc-seg" data-seg="vehSeg" data-vals="A,B,C" data-def="A"></div>
+      <span class="sc-div"></span>
+      <div class="sc-jumps" id="scJumps"></div>
+    </div>
+    <div class="sc-scope">22.6&nbsp;s process · ~90&nbsp;s door-to-door incl. convey + QC · heavy-soil +60&nbsp;s (~12%)</div>
+    <div class="sc-drawer" id="scDrawer" hidden>
+      <div class="sc-drawer-head"><b>All views</b><button id="scDrawerClose">✕</button></div>
+      <div class="sc-drawer-grid" id="scDrawerGrid"></div>
+    </div>
   </div>
 
   <script src="js/vendor/three.min.js"></script>

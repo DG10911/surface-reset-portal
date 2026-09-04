@@ -2237,11 +2237,20 @@ function APP() {
   if (location.hash) { const p = location.hash.slice(1); if (document.querySelector('[data-page="' + p + '"]')) setPage(p); }
 
   /* ---------- main update ---------- */
-  function moduleActive(k, tc) {
+  const ZONE_R = 3.1; /* half-width of a station's active zone (stations are 5 apart) */
+  /* proximity envelope: 1 at the station centre, ramps to 0 at ±ZONE_R — each equipment
+     only performs while the car is passing its own section, then stops. */
+  function zoneAmt(k) {
+    if (soloMod) return soloMod === k ? 1 : 0;
+    if (mode === 'manual') return manualOn[k] ? 1 : 0;
+    if (!hero || flow !== 'inportal') return 0;
+    const st = STATIONS[k]; if (!st) return 0;
+    return clamp(1 - Math.abs(hero.position.x - st.x) / ZONE_R, 0, 1);
+  }
+  function moduleActive(k) {
     if (soloMod) return soloMod === k;
     if (mode === 'manual' && manualOn[k]) return true;
-    const m = MODS.find(x => x.k === k);
-    return tc >= m.s && tc <= m.e;
+    return zoneAmt(k) > 0.03;
   }
   function cleanNow() {
     if (!hero) return 0;
@@ -2330,11 +2339,9 @@ function APP() {
           }
         } else {
           cycleT += dt;
-          /* station-dwell: car quick-slides to the active station, holds while it fires, then moves on */
-          let cur = MODS[0];
-          for (let mi = 0; mi < MODS.length; mi++) if (cycleT >= MODS[mi].s) cur = MODS[mi];
-          const targetX = (STATIONS[cur.k] || { x: LANE.portalOut }).x;
-          hero.position.x = damp(hero.position.x, targetX, 3.6, dt);
+          /* car glides continuously through the portal over the full cycle */
+          const u = clamp(cycleT / CYCLE, 0, 1);
+          hero.position.x = lerp(LANE.portalIn, LANE.portalOut, u);
           hero.position.z = 0;
           MODS.forEach(m => {
             if (cycleT >= m.s && cycleT < m.s + dt + 0.02) {
@@ -2494,20 +2501,20 @@ function APP() {
       const sOn = moduleActive('scan', tc);
       scanPlane.visible = sOn; scanBox.visible = sOn;
       if (sOn) {
-        scanPlane.position.set(cx - 2.2 + seg(tc, 0, 1.9) * 4.4, 1.25, 0); scanBox.position.set(cx, 1.15, 0);
+        scanPlane.position.set(cx - 2.2 + ((T * 0.7) % 1) * 4.4, 1.25, 0); scanBox.position.set(cx, 1.15, 0);
         heatPatches.forEach((p, i) => {
           const zn = [[0, 2.05, 0], [1.4, 1.35, 0], [0, 0.8, 0.9], [0, 0.8, -0.9], [-2.1, 0.85, 0], [0.6, 1.6, 0]][i];
           p.position.set(cx + zn[0], zn[1], zn[2]);
           if (i < 2 || i === 4) p.rotation.set(-Math.PI / 2, 0, 0); else p.rotation.set(0, i === 3 ? Math.PI : 0, 0);
-          p.material.opacity = seg(tc, 0.3 + i * 0.11, 1.1 + i * 0.11) * 0.35;
+          p.material.opacity = zoneAmt('scan') * 0.35;
         });
       } else heatPatches.forEach(p => p.material.opacity = Math.max(0, p.material.opacity - dt));
 
-      const ionI = moduleActive('ion', tc) ? tri(tc, 1.9, 4.7) || (mode === 'manual' ? 0.8 : 0) : 0;
+      const ionI = (mode === 'manual' && manualOn.ion) ? 0.8 : zoneAmt('ion');
       ionBar.material.emissiveIntensity = ionI * 0.75;
       if (activeFault && activeFault.id === 'tex') ionBar.material.emissiveIntensity *= 0.3;
 
-      const mistI = moduleActive('mist', tc) ? (tri(tc, 3.8, 7.5) || (mode === 'manual' ? 0.7 : 0)) : 0;
+      const mistI = (mode === 'manual' && manualOn.mist) ? 0.7 : zoneAmt('mist');
       mistCones.children.forEach((c, ci) => {
         const blocked = activeFault && activeFault.id === 'nozzle' && ci === 3;
         c.material.opacity = blocked ? 0 : mistI * 0.26;
@@ -2522,7 +2529,7 @@ function APP() {
       }
 
       const texOn = moduleActive('tex', tc);
-      const tIn = ease(seg(tc, 5.6, 6.8)), tOut = ease(seg(tc, 14.3, 15.5));
+      const tIn = zoneAmt('tex'), tOut = 0;
       roofArray.visible = texOn;
       if (texOn) {
         const tin = mode === 'manual' && manualOn.tex ? 1 : tIn;
@@ -2549,15 +2556,15 @@ function APP() {
         if (mat.uniforms && mat.uniforms.uWaveX) mat.uniforms.uWaveX.value = u;
       });
 
-      const airI = moduleActive('air', tc) ? (tri(tc, 11.3, 18.8) || (mode === 'manual' ? 0.7 : 0)) : 0;
+      const airI = (mode === 'manual' && manualOn.air) ? 0.7 : zoneAmt('air');
       airUnits.forEach(a => {
         a.u.visible = airI > 0.02; a.u.position.x = hero.position.x + a.zs * 1.0;
         a.sheet.material.opacity = airI * (0.28 + 0.18 * Math.abs(Math.sin(T * 11)));
       });
       const gOn = moduleActive('gloss', tc);
-      const gI = gOn ? seg(tc, 19.5, 22.6) : 0;
+      const gI = zoneAmt('gloss');
       glossRing.visible = gOn;
-      if (glossRing.visible) { glossRing.position.set(hero.position.x - 2.1 + gI * 4.2, 1.2, 0); glossRing.material.opacity = 0.4 * (tri(tc, 19.5, 22.6) || 0.4) + 0.15; }
+      if (glossRing.visible) { glossRing.position.set(hero.position.x - 2.1 + gI * 4.2, 1.2, 0); glossRing.material.opacity = 0.4 * zoneAmt('gloss') + 0.15; }
       if (window.SRP && SRP.tickCloud) {
         SRP.tickCloud(P_ion, dt, ionI, 'ion', { x: cx }, T, lofx);
         SRP.tickCloud(P_mist, dt, mistI, 'mist', { x: cx }, T, lofx);
@@ -2692,8 +2699,8 @@ function APP() {
     $('tSpd').textContent = spd.toFixed(2) + ' m/s';
     $('tCyc').textContent = fmtT(inP ? cycleT : 0) + ' s';
     $('tAir').textContent = (inP && moduleActive('ion', tc)) || (inP && moduleActive('air', tc)) ? (18 + Math.sin(T * 3) * 2).toFixed(1) + ' m/s est.' : '—';
-    $('tMist').textContent = inP && moduleActive('mist', tc) ? Math.round(tri(tc, 4, 8) * 100) + '%' : '0%';
-    $('tTex').textContent = inP && moduleActive('tex', tc) ? Math.round(seg(tc, 6, 16) * 100) + '%' : '0%';
+    $('tMist').textContent = inP && moduleActive('mist') ? Math.round(zoneAmt('mist') * 100) + '%' : '0%';
+    $('tTex').textContent = inP && moduleActive('tex') ? Math.round(zoneAmt('tex') * 100) + '%' : '0%';
     $('tCov').textContent = Math.round(dirt * 100) + '%';
     $('tQ').textContent = String(queueCars.length);
     $('twPlc').textContent = $('stCycle').textContent;

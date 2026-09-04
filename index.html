@@ -1,822 +1,1522 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CARS24 · Surface Reset Portal — Hub Simulation</title>
-<style>
-:root{
-  --bg:#0B1220; --panel:rgba(13,20,38,.82); --panel2:#0d1428; --line:#1e2a4a; --line2:#2c3a63;
-  --ink:#E8EFFF; --muted:#8296bd; --teal:#2DD4BF; --cyan:#38BDF8; --yellow:#FFD21E;
-  --scan:#64748B; --ion:#A78BFA; --mist:#38BDF8; --tex:#FF8A3D; --texc:#34D399; --air:#FBBF24; --gloss:#F472B6;
-  --good:#22C55E; --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
-}
-*{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;overflow:hidden}
-#wrap{position:fixed;inset:0;display:flex;flex-direction:column}
-/* ---------- topbar ---------- */
-#topbar{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line);background:rgba(11,18,32,.9);z-index:30}
-.logo{display:flex;align-items:center;font-weight:900;font-size:19px;letter-spacing:-.01em}
-.logo .c24{background:var(--yellow);color:#0A0E1A;padding:3px 9px;border-radius:7px}
-.tt{display:flex;flex-direction:column;line-height:1.12}
-.tt b{font-size:13.5px}
-.tt span{font-size:10px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase}
-.tabs{display:flex;gap:4px;margin-left:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px}
-.tabs button{font:inherit;font-size:12px;font-weight:700;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:7px 13px;cursor:pointer}
-.tabs button.on{background:var(--teal);color:#06231e}
-#topStats{margin-left:auto;display:flex;gap:14px;font-family:var(--mono);font-size:11.5px;color:var(--muted);align-items:center}
-#topStats b{color:var(--ink)}
-@media(max-width:760px){#topStats{display:none}}
-/* ---------- stage ---------- */
-#stage{position:relative;flex:1;min-height:0;background:#0B1220}
-#c3d{display:block;width:100%;height:100%}
-#offline{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--muted);text-align:center;padding:30px}
-/* overhead timer */
-#bigTimer{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;align-items:baseline;gap:8px;
-  background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:8px 20px;backdrop-filter:blur(8px);z-index:10}
-#bigTimer .t{font-family:var(--mono);font-size:34px;font-weight:800;letter-spacing:-.02em}
-#bigTimer .u{font-family:var(--mono);font-size:13px;color:var(--muted)}
-#bigTimer .ph{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-left:6px}
-/* narrator */
-#narr{position:absolute;left:50%;transform:translateX(-50%);bottom:120px;width:600px;max-width:88%;
-  background:var(--panel);backdrop-filter:blur(10px);border:1px solid var(--line2);border-left:4px solid var(--cyan);
-  border-radius:12px;padding:10px 14px;z-index:10;transition:border-color .25s}
-#narr .r1{display:flex;align-items:center;gap:9px;margin-bottom:2px}
-#narr .no{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.1em;color:#0A0E1A;background:var(--cyan);padding:2px 7px;border-radius:5px}
-#narr .nm{font-size:13.5px;font-weight:800}
-#narr .ds{font-size:11.5px;color:var(--muted);line-height:1.45}
-/* left controls */
-#ctrls{position:absolute;left:14px;bottom:120px;display:flex;flex-direction:column;gap:8px;z-index:10}
-.btn{font:inherit;cursor:pointer;border:none;border-radius:10px;padding:10px 16px;font-weight:800;font-size:12.5px}
-.btn-hero{background:linear-gradient(180deg,#FFD21E,#F5B301);color:#0A0E1A;box-shadow:0 8px 24px rgba(255,210,30,.35)}
-.btn-ghost{background:#131c38;color:#dfe8ff;border:1px solid var(--line2)}
-.btn-ghost.on{background:var(--teal);color:#06231e;border-color:var(--teal)}
-.rowbtns{display:flex;gap:6px;flex-wrap:wrap;max-width:270px}
-.rowbtns .btn{padding:8px 10px;font-size:11px}
-.lbl{font-size:9.5px;font-weight:800;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-top:2px}
-/* Gantt bottom strip */
-#gantt{position:absolute;left:0;right:0;bottom:0;background:rgba(9,14,26,.94);border-top:1px solid var(--line);padding:9px 16px 10px;z-index:12}
-#gantt .gh{display:flex;justify-content:space-between;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-family:var(--mono)}
-.grow{display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;margin-bottom:3px}
-.grow .gl{font-size:10.5px;font-weight:700;text-align:right;opacity:.55;font-family:var(--mono)}
-.grow .gl.on{opacity:1}
-.gtrack{position:relative;height:11px;background:#0d1430;border-radius:4px;border:1px solid var(--line);overflow:hidden}
-.gspan{position:absolute;top:0;height:100%;border-radius:4px;opacity:.3}
-.gspan.on{opacity:.95}
-.gfill{position:absolute;top:0;height:100%;width:0;background:rgba(255,255,255,.22)}
-#gph{position:absolute;top:26px;bottom:8px;width:2px;background:var(--yellow);box-shadow:0 0 10px var(--yellow);opacity:0;z-index:2}
-/* dashboard */
-#dash{position:absolute;top:14px;right:14px;width:284px;max-height:calc(100% - 150px);overflow:auto;background:var(--panel);
-  backdrop-filter:blur(10px);border:1px solid var(--line2);border-radius:14px;z-index:11;font-family:var(--mono)}
-#dash header{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border-bottom:1px solid var(--line);cursor:pointer;font-family:inherit}
-#dash header b{font-size:11px;letter-spacing:.12em;text-transform:uppercase}
-#dash header span{color:var(--muted);font-size:12px}
-#dashBody{padding:11px 13px}
-.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.dk{background:#0d1430;border:1px solid var(--line);border-radius:9px;padding:7px 9px}
-.dk b{display:block;font-size:14px;font-weight:800}
-.dk span{font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.dsec{font-size:9px;font-weight:800;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin:12px 0 6px}
-#cqsChart{width:100%;height:56px;background:#0d1430;border:1px solid var(--line);border-radius:9px}
-table.bom{width:100%;border-collapse:collapse;font-size:10.5px}
-table.bom td{padding:2.5px 0;color:var(--muted)}
-table.bom td:last-child{text-align:right;color:var(--ink)}
-table.bom tr.tot td{border-top:1px solid var(--line2);padding-top:5px;color:var(--ink);font-weight:800}
-input[type=range]{width:100%;accent-color:var(--teal)}
-.payline{display:flex;justify-content:space-between;font-size:11px;margin-top:4px}
-.payline b{color:var(--teal)}
-/* QC panel */
-#qcPanel{position:absolute;top:64px;left:14px;width:252px;background:var(--panel);backdrop-filter:blur(10px);
-  border:1px solid var(--line2);border-radius:14px;padding:12px 14px;z-index:11;display:none;font-family:var(--mono)}
-#qcPanel h4{margin:0 0 8px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-family:inherit}
-.qz{display:grid;grid-template-columns:56px 1fr 34px;gap:7px;align-items:center;margin-bottom:4px;font-size:10.5px}
-.qz .zb{height:8px;background:#0d1430;border-radius:4px;overflow:hidden;border:1px solid var(--line)}
-.qz .zf{height:100%;width:0;background:var(--good);border-radius:4px}
-.qz .zv{text-align:right}
-#qcRow2{display:flex;align-items:center;gap:10px;margin-top:9px}
-#cqsBig{font-size:26px;font-weight:800}
-#qcGloss{font-size:10px;color:var(--muted);line-height:1.5}
-#qcGloss b{color:var(--ink)}
-#passBadge{margin-top:9px;display:none;align-items:center;gap:7px;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.5);
-  color:#7ef0a8;border-radius:9px;padding:7px 10px;font-size:11px;font-weight:800;letter-spacing:.06em}
-#beadCanvas{width:100%;height:34px;background:#0d1430;border:1px solid var(--line);border-radius:8px;margin-top:8px}
-/* scan tab */
-#scanTab{position:absolute;inset:0;display:none;background:var(--bg);z-index:20;overflow:auto;padding:18px}
-#scanTab .inner{max-width:860px;margin:0 auto}
-#scanTab h3{margin:4px 0 4px;font-size:18px}
-#scanTab p.sub{margin:0 0 14px;color:var(--muted);font-size:12.5px}
-#feedWrap{position:relative;background:#000;border:1px solid var(--line2);border-radius:14px;overflow:hidden;aspect-ratio:4/3;max-height:52vh}
-#vid,#scanImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-#gridOv{position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(4,1fr)}
-.cell{border:1px solid rgba(56,189,248,.25);position:relative}
-.cell span{position:absolute;left:3px;bottom:2px;font-family:var(--mono);font-size:8.5px;font-weight:800;padding:1px 4px;border-radius:3px;background:rgba(0,0,0,.55)}
-.cell.CLEAN span{color:#7ef0a8}.cell.DUST span{color:#ffe084}.cell.GRIME span{color:#ffb066}.cell.BONDED span{color:#ff7d7d}
-.cell.DUST{background:rgba(255,210,30,.10)}.cell.GRIME{background:rgba(255,138,61,.14)}.cell.BONDED{background:rgba(239,68,68,.16)}
-#verdict{margin-top:12px;background:var(--panel2);border:1px solid var(--line2);border-left:4px solid var(--teal);border-radius:10px;padding:11px 14px;font-family:var(--mono);font-size:13px;font-weight:700}
-#scanBtns{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
-/* presenter */
-body.presenter #dash,body.presenter #ctrls,body.presenter #narr,body.presenter #qcPanel,body.presenter #topbar{display:none!important}
-body.presenter #gantt{background:rgba(9,14,26,.75)}
-#exitPres{position:absolute;top:12px;right:12px;z-index:40;display:none}
-body.presenter #exitPres{display:block}
-@media(max-width:760px){
-  #dash{width:210px}#narr{bottom:150px;width:92%}#ctrls{bottom:150px}
-  .grow{grid-template-columns:76px 1fr}.grow .gl{font-size:8.5px}
-  #bigTimer .t{font-size:24px}
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CARS24 · Surface Reset Portal — Digital Twin</title>
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css" />
 </head>
+
 <body>
-<div id="wrap">
-  <div id="topbar">
-    <div class="logo"><span class="c24">CARS24</span></div>
-    <div class="tt"><b>Surface Reset Portal</b><span>Hub Simulation · Car-a-thon</span></div>
-    <div class="tabs">
-      <button id="tabSim" class="on">SIMULATION</button>
-      <button id="tabScan">SCAN DEMO</button>
-    </div>
-    <div id="topStats">
-      <span>PROCESS <b>24s</b></span><span>DOOR-TO-DOOR <b>~90s</b></span><span>THROUGHPUT <b>40 cars/hr</b></span>
-      <span>RINSE WATER <b>0 L</b></span><span>VS MANUAL <b>10×</b></span>
-    </div>
-  </div>
+  <div id="app">
 
-  <div id="stage">
-    <canvas id="c3d"></canvas>
-    <div id="offline">
-      <b style="font-size:16px">3D engine unavailable</b>
-      <span>The three.js CDN could not be reached. Reconnect and reload — the simulation runs fully in-browser.</span>
-    </div>
-
-    <div id="bigTimer"><span class="t" id="bt">0.0</span><span class="u">/ 24.0 s</span><span class="ph" id="btPh">IDLE</span></div>
-
-    <div id="narr">
-      <div class="r1"><span class="no" id="nNo">READY</span><span class="nm" id="nNm">Surface Reset Portal</span></div>
-      <div class="ds" id="nDs">Press RUN FULL HUB FLOW — a dusty car rides the conveyor into the portal, all six modules fire concurrently for 24 seconds, then it conveys out to quality check. The conveyor is transport; the portal is the process.</div>
-    </div>
-
-    <div id="ctrls">
-      <button class="btn btn-hero" id="runBtn">▶ RUN FULL HUB FLOW</button>
-      <div class="rowbtns">
-        <button class="btn btn-ghost" id="heavyBtn">Next car: heavy soil</button>
-        <button class="btn btn-ghost" id="presBtn">Presenter mode</button>
-      </div>
-      <div class="lbl">Camera</div>
-      <div class="rowbtns">
-        <button class="btn btn-ghost cam on" data-cam="follow">FOLLOW CAR</button>
-        <button class="btn btn-ghost cam" data-cam="portal">PORTAL</button>
-        <button class="btn btn-ghost cam" data-cam="qc">QC</button>
-        <button class="btn btn-ghost cam" data-cam="top">TOP</button>
-        <button class="btn btn-ghost cam" data-cam="orbit">FREE</button>
-      </div>
-      <div class="lbl">Speed</div>
-      <div class="rowbtns">
-        <button class="btn btn-ghost spd" data-s="0.5">0.5×</button>
-        <button class="btn btn-ghost spd on" data-s="1">1×</button>
-        <button class="btn btn-ghost spd" data-s="2">2×</button>
-      </div>
-    </div>
-
-    <div id="qcPanel">
-      <h4>QUALITY CHECK · Cars24 Standard</h4>
-      <div id="qzWrap"></div>
-      <div id="qcRow2">
-        <div><div id="cqsBig">0</div><div style="font-size:8.5px;color:var(--muted);letter-spacing:.08em">CQS SCORE</div></div>
-        <div id="qcGloss">Gloss meter<br/><b id="gBefore">58 GU</b> → <b id="gAfter" style="color:#7ef0a8">— GU</b><br/>SiO₂ hydrophobic coat</div>
-      </div>
-      <canvas id="beadCanvas" width="220" height="34"></canvas>
-      <div id="passBadge">✔ PASS — CARS24 STANDARD</div>
-    </div>
-
-    <div id="dash">
-      <header id="dashHead"><b>Operations Dashboard</b><span id="dashArrow">▾</span></header>
-      <div id="dashBody">
-        <div class="dgrid">
-          <div class="dk"><b id="dCars">0</b><span>Cars today</span></div>
-          <div class="dk"><b>40/hr</b><span>Throughput</span></div>
-          <div class="dk"><b id="dWater">0 L</b><span>Water saved today</span></div>
-          <div class="dk"><b>1.6 L</b><span>Liquid / car (0 L rinse)</span></div>
-          <div class="dk"><b>0.5 kWh</b><span>Energy / car</span></div>
-          <div class="dk"><b>99.2%</b><span>Uptime</span></div>
+    <!-- TOP BAR -->
+    <header id="top">
+      <div class="brand">
+        <div class="brand-badge"><span class="bb-c24">CARS</span><span class="bb-num">24</span></div>
+        <div class="brand-copy">
+          <b>Surface Reset Portal</b>
+          <span>Parallel cleaning field · digital twin</span>
         </div>
-        <div class="dsec">CQS distribution · today</div>
-        <canvas id="cqsChart" width="256" height="56"></canvas>
-        <div class="dsec">Economics · capex BOM (₹ lakh)</div>
-        <table class="bom">
-          <tr><td>Gantry frame + conveyor</td><td>4.0</td></tr>
-          <tr><td>Conformal textile array</td><td>4.5</td></tr>
-          <tr><td>Vision + edge compute</td><td>2.2</td></tr>
-          <tr><td>Air-knife blowers</td><td>2.4</td></tr>
-          <tr><td>PLC + safety</td><td>1.2</td></tr>
-          <tr><td>Ionizer bars</td><td>0.9</td></tr>
-          <tr><td>Rinseless mist system</td><td>0.9</td></tr>
-          <tr><td>SiO₂ gloss applicator</td><td>0.6</td></tr>
-          <tr><td>Enclosure + install</td><td>1.8</td></tr>
-          <tr class="tot"><td>Total (unit 1) · ₹14–16L at 200-unit volume</td><td>18.5</td></tr>
-        </table>
-        <div class="dsec">Payback · opex ~₹120/car</div>
-        <input type="range" id="cpd" min="30" max="120" value="60"/>
-        <div class="payline"><span id="cpdV">60 cars/day</span><b id="payV">— months</b></div>
       </div>
-    </div>
+      <div class="tcell status">
+        <span class="k">System</span>
+        <span class="v live" id="stSystem"><i class="dot"></i>ONLINE</span>
+      </div>
+      <div class="tcell">
+        <span class="k">Cycle</span>
+        <span class="v" id="stCycle">IDLE</span>
+      </div>
+      <div class="tcell time">
+        <span class="k">Process time · target 22.6s</span>
+        <span class="v" id="stTime">00.00 <small>/ 22.60 s</small></span>
+        <i class="cell-fill" id="timeFill"></i>
+      </div>
+      <div class="tcell">
+        <span class="k">Vehicle</span>
+        <span class="v" id="stVeh">—</span>
+      </div>
+      <div class="tcell">
+        <span class="k">Cycles today</span>
+        <span class="v" id="stCount">000</span>
+      </div>
+      <div class="tcell hub">
+        <span class="k">Network hub</span>
+        <select id="hubSel" aria-label="Select hub">
+          <option value="HUB-01">HUB-01 · Gurugram</option>
+          <option value="HUB-02">HUB-02 · Delhi NCR</option>
+          <option value="HUB-03">HUB-03 · Mumbai</option>
+        </select>
+      </div>
+      <div class="tcell">
+        <span class="k">Hub clock</span>
+        <span class="v" id="clock">00:00:00</span>
+      </div>
+      <div class="tcell sfx-cell">
+        <span class="k">Sound</span>
+        <button class="toggle on" id="sfxBtn" aria-pressed="true" title="Sound design"><i></i></button>
+      </div>
+    </header>
 
-    <button class="btn btn-ghost" id="exitPres">Exit presenter</button>
+    <!-- LEFT NAV -->
+    <nav id="nav">
+      <i id="navInd" aria-hidden="true"></i>
+      <button class="nv on" data-page="simulation" title="Simulation">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="8" width="18" height="10" />
+          <path d="M7 8V6h10v2M8 18v3M16 18v3" />
+        </svg>
+        <span>Sim</span>
+      </button>
+      <button class="nv" data-page="modules" title="6 Cleaning modules">
+        <svg viewBox="0 0 24 24">
+          <rect x="2" y="3" width="9" height="9" />
+          <rect x="13" y="3" width="9" height="9" />
+          <rect x="2" y="14" width="9" height="7" />
+          <rect x="13" y="14" width="9" height="7" />
+        </svg>
+        <span>Mods</span>
+      </button>
+      <button class="nv" data-page="dashboard" title="Operator console">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="8" height="8" />
+          <rect x="13" y="3" width="8" height="5" />
+          <rect x="13" y="10" width="8" height="11" />
+          <rect x="3" y="13" width="8" height="8" />
+        </svg>
+        <span>Ops</span>
+      </button>
+      <button class="nv" data-page="fleet" title="Fleet · 200 hubs">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 10h16M4 14h10" />
+          <circle cx="8" cy="8" r="2" />
+          <circle cx="16" cy="7" r="2" />
+          <circle cx="12" cy="16" r="2" />
+        </svg>
+        <span>Fleet</span>
+      </button>
+      <button class="nv" data-page="roi" title="Business case">
+        <svg viewBox="0 0 24 24">
+          <rect x="4" y="4" width="16" height="16" />
+          <path d="M8 16V10M12 16V8M16 16v-4" />
+        </svg>
+        <span>Case</span>
+      </button>
+      <button class="nv" data-page="cameras" title="Cameras">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3" />
+          <rect x="2" y="6" width="20" height="12" />
+          <path d="M7 6V4h4" />
+        </svg>
+        <span>Cams</span>
+      </button>
+      <button class="nv" data-page="twin" title="Digital twin">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="8" height="18" />
+          <rect x="13" y="3" width="8" height="18" />
+          <path d="M7 8h0M7 12h0M17 8h0" />
+        </svg>
+        <span>Twin</span>
+      </button>
+      <button class="nv" data-page="engineering" title="Engineering">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1" />
+        </svg>
+        <span>Eng</span>
+      </button>
+      <button class="nv" data-page="analytics" title="Analytics">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+        </svg>
+        <span>Data</span>
+      </button>
+      <button class="nv" data-page="quality" title="Quality">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="8" />
+          <path d="m8 12 3 3 5-6" />
+        </svg>
+        <span>QC</span>
+      </button>
+      <button class="nv" data-page="log" title="System log">
+        <svg viewBox="0 0 24 24">
+          <path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" />
+        </svg>
+        <span>Log</span>
+      </button>
+      <button class="nv" data-page="maintenance" title="Maintenance">
+        <svg viewBox="0 0 24 24">
+          <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 0 5.4-5.4L16 11l-3-3 1.7-1.7z" />
+        </svg>
+        <span>Maint</span>
+      </button>
+      <button class="nv" data-page="settings" title="Settings">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M4 12h2M18 12h2M12 4v2M12 18v2" />
+        </svg>
+        <span>Set</span>
+      </button>
+    </nav>
 
-    <div id="gantt">
-      <div class="gh"><span>24-second overlapped cycle — six modules, one car, same instant</span><span id="gpct">0%</span></div>
-      <div id="grows" style="position:relative"><div id="gph"></div></div>
+    <!-- 3D STAGE -->
+    <section id="stage">
+      <canvas id="c3d"></canvas>
+      <div id="offline">
+        <b>3D engine unavailable</b>
+        <span>The three.js CDN could not be reached. Reconnect and reload — this twin runs fully in-browser.</span>
+      </div>
+      <div class="bracket tl"></div>
+      <div class="bracket tr"></div>
+      <div class="bracket bl"></div>
+      <div class="bracket br"></div>
+      <div id="techGrid" aria-hidden="true"></div>
+      <div id="spot" aria-hidden="true"></div>
+      <div id="scanSweep" aria-hidden="true"></div>
+      <div id="grain" aria-hidden="true"></div>
+      <div id="flash" aria-hidden="true"></div>
+
+      <div id="timerHud">
+        <span class="t" id="bt">00.00</span>
+        <span class="u">/ 22.60 s</span>
+        <span class="ph" id="btPh">IDLE</span>
+      </div>
+      <div id="camHud">
+        <span id="camName"><b>HERO CAMERA</b></span>
+        <span id="camMeta">FOV 42° · HUB-01</span>
+        <span class="rec" id="camRec" hidden><i></i> REC · <span id="camTs"></span></span>
+      </div>
+      <div id="narr">
+        <div class="r1"><span class="no" id="nNo">READY</span><span class="nm" id="nNm">Surface Reset Portal</span>
+        </div>
+        <div class="ds" id="nDs">The bottleneck was not speed. It was sequence. Press START CYCLE — six modules fire as
+          one overlapped field for 22.6 seconds.</div>
+      </div>
+      <div id="soloHud" hidden>
+        <div class="sh-head">
+          <span class="sh-tag">SEPARATE MODULE DEMO</span>
+          <b class="sh-name" id="shName">01 · VEHICLE SCAN</b>
+          <span class="sh-time" id="shTime">0.0s / 4.5s</span>
+        </div>
+        <div class="sh-sub" id="shSub">IR Presence, 3D profiling, topography detection</div>
+        <div class="sh-bar"><i id="shBarFill"></i></div>
+        <div class="sh-actions">
+          <button type="button" class="btn" id="shPrev">◀ Prev</button>
+          <button type="button" class="btn btn-run" id="shReplay">🔁 Replay</button>
+          <button type="button" class="btn" id="shNext">Next ▶</button>
+          <button type="button" class="btn" id="shStep">▶ Step All 6</button>
+          <button type="button" class="btn" id="shExit">✖ Exit Solo</button>
+        </div>
+      </div>
+      <div id="intro">
+        <div>
+          <p class="kicker">Cars24 reconditioning hub · digital twin</p>
+          <h1>Surface<br />Reset Portal</h1>
+          <p>Sequential detailing collapsed into a parallel cleaning field. Target cycle 22.6 seconds. Zero rinse water.
+          </p>
+        </div>
+      </div>
+      <div id="cine">
+        <button type="button" class="btn" id="cineSkip">Skip intro</button>
+        <div class="cine-stage">
+          <div class="cine-mark" id="cineMark">SURFACE RESET</div>
+          <p class="cine-kicker" id="cineKick">Reconditioning hub · digital twin</p>
+          <h2 class="cine-q" id="cineQ"></h2>
+          <p class="cine-sub" id="cineSub"></p>
+        </div>
+      </div>
+      <div id="fieldViz">
+        <div class="fv-head">
+          <span>Parallel cleaning field</span>
+          <b id="fvTime">00.00</b>
+          <span id="fvActive">0 / 6 live</span>
+        </div>
+        <div class="fv-lanes" id="fvLanes"></div>
+        <div class="fv-foot">
+          <span>Sequential · 4 min</span>
+          <i></i>
+          <span>Parallel · <b>22.6 s</b></span>
+        </div>
+      </div>
+      <div id="splitReveal">
+        <div class="split-inner" style="position:relative">
+          <button type="button" id="splitCloseBtn" class="btn"
+            style="position:absolute;top:12px;right:12px;padding:3px 9px;font-size:14px;border:1px solid var(--line-2)" title="Close comparison">✕</button>
+          <span class="sim-tag">Studio Inspection</span>
+          <p class="kicker">Before / After · Surface Reset Comparison</p>
+          <div class="split-stage" id="splitStage">
+            <img id="splitBefore" alt="Inbound dirty vehicle" />
+            <div class="split-after" id="splitAfterWrap">
+              <img id="splitAfter" alt="Outbound clean vehicle" />
+            </div>
+            <div class="split-handle" id="splitHandle"><b></b></div>
+            <span class="split-l">BEFORE · 84% SOIL · 58 GU</span>
+            <span class="split-r">AFTER · 22.60s RESET · 94 GU</span>
+          </div>
+          <input type="range" id="splitRange" min="0" max="100" value="50" aria-label="Before after slider" />
+          <div class="split-nums">
+            <div><span>Contamination</span><b id="splitCont">84% → 2%</b></div>
+            <div><span>Gloss rating</span><b id="splitGloss">58 GU → 94 GU</b></div>
+            <div><span>SiO₂ Protection</span><b id="splitCov">98.5% Monolayer</b></div>
+          </div>
+          <div class="done-actions">
+            <button class="btn btn-run" id="split3D">⚡ Return to 3D Inspection</button>
+            <button class="btn" id="splitReplay">Replay 22.6s cycle</button>
+            <button class="btn" id="splitClose">Close</button>
+          </div>
+        </div>
+      </div>
+      <div id="engLabels" hidden></div>
+      <div id="doneCard">
+        <div class="inner" style="position:relative">
+          <button type="button" id="doneCloseBtn" class="btn" style="position:absolute;top:14px;right:14px;padding:3px 9px;font-size:14px;border:1px solid var(--line-2)" title="Inspect vehicle in 3D">✕</button>
+          <span class="sim-tag">Surface reset complete</span>
+          <p class="kicker">Vehicle Staged in Final Inspection Bay</p>
+          <h2>22.60 SEC</h2>
+          <div class="sub">100% Surface Reset · 360° Handover Clearance</div>
+          <div class="qgrid">
+            <div><span>Surface coverage</span><b id="dCov">98.5%</b></div>
+            <div><span>Contamination drop</span><b id="dCont">84% → 2%</b></div>
+            <div><span>Gloss estimate</span><b id="dGloss">58 → 94 GU</b></div>
+            <div><span>Protection estimate</span><b id="dProt">96% Monolayer</b></div>
+          </div>
+          <div class="done-actions" style="flex-wrap:wrap">
+            <button class="btn btn-run" id="doneToggle3D">⚡ View BEFORE (Dirty)</button>
+            <button class="btn" id="doneCompare">🔍 Before / after slider</button>
+            <button class="btn" id="doneInspect">👁 Inspect in 3D (Clear View)</button>
+            <button class="btn" id="doneReplay">Replay cycle</button>
+          </div>
+        </div>
+      </div>
+      <div id="inspectBar" class="hud" style="display:none">
+        <div class="ib-inner">
+          <span class="ib-tag">FINISH BAY</span>
+          <b id="ibState">AFTER · 94 GU MIRROR GLOSS</b>
+          <div class="ib-actions">
+            <button type="button" class="btn btn-run" id="ibToggle">⚡ View BEFORE (Dirty)</button>
+            <button type="button" class="btn" id="ibSlider">🔍 Before / After Slider</button>
+            <button type="button" class="btn" id="ibOrbit">🔄 360° Orbit</button>
+            <button type="button" class="btn" id="ibReplay">Replay 22.6s</button>
+          </div>
+        </div>
+      </div>
+      <div id="quote">
+        <blockquote id="quoteT"></blockquote><cite>Surface Reset Portal</cite>
+      </div>
+      <button class="btn" id="exitPres">Exit presenter</button>
+      <div id="faultBanner" hidden>
+        <b id="faultTitle">FAULT</b>
+        <span id="faultMsg"></span>
+        <button class="btn" id="faultClear">Clear &amp; reset</button>
+      </div>
+    </section>
+
+    <!-- RIGHT RAIL -->
+    <aside id="rail">
+      <div class="rail-head"><b id="railTitle">Live modules</b><span id="railSub">overlapped</span></div>
+      <div id="railBody">
+
+        <div class="rail-pane on" id="paneSim">
+          <div id="modCards"></div>
+          <div class="sec">Vehicle sensor map · simulated</div>
+          <div id="sensorMap">
+            <svg viewBox="0 0 160 220" id="sensorSvg">
+              <rect class="sz" id="szROOF" x="40" y="50" width="80" height="50" />
+              <rect class="sz" id="szHOOD" x="48" y="18" width="64" height="32" />
+              <rect class="sz" id="szLEFT" x="18" y="50" width="22" height="110" />
+              <rect class="sz" id="szRIGHT" x="120" y="50" width="22" height="110" />
+              <rect class="sz" id="szREAR" x="48" y="160" width="64" height="28" />
+              <rect class="sz" id="szGLASS" x="50" y="70" width="60" height="22" />
+              <rect class="sz" id="szMIRRORS" x="28" y="62" width="104" height="10" />
+              <text x="80" y="78" text-anchor="middle" fill="#7C7870" font-size="8"
+                font-family="IBM Plex Mono">TOP</text>
+            </svg>
+          </div>
+          <div class="sec">Telemetry · modelled</div>
+          <div class="tele" id="tele">
+            <span>Vehicle speed</span><b id="tSpd">0.0 m/s</b>
+            <span>Cycle time</span><b id="tCyc">00.00 s</b>
+            <span>Airflow (est.)</span><b id="tAir">—</b>
+            <span>Mist coverage</span><b id="tMist">0%</b>
+            <span>Textile contact</span><b id="tTex">0%</b>
+            <span>Surface coverage</span><b id="tCov">0%</b>
+            <span>Energy / car</span><b>0.5 kWh</b>
+            <span>Liquid / car</span><b>&lt; 2.0 L</b>
+            <span>Queue</span><b id="tQ">4</b>
+            <span>Quality score</span><b id="tCqs">—</b>
+          </div>
+          <canvas id="eqMini" width="240" height="28" aria-hidden="true"></canvas>
+          <div class="sec">Quality check</div>
+          <div id="qcMini">
+            <div id="qzWrap"></div>
+            <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px">
+              <div style="font-family:var(--font-d);font-size:28px;font-weight:600" id="cqsBig">—</div>
+              <div style="font-size:11px;color:var(--muted)">CQS · simulation estimate<br /><b id="gBefore">58 GU</b> →
+                <b id="gAfter">— GU</b></div>
+            </div>
+            <canvas id="beadCanvas" width="240" height="34"></canvas>
+            <div id="passBadge">Pass — Cars24 standard</div>
+          </div>
+        </div>
+
+        <div class="rail-pane" id="paneCam">
+          <div class="cam-list" id="camList"></div>
+          <div class="sec">CCTV bank</div>
+          <div class="ctrl-row" id="cctvBtns"></div>
+        </div>
+
+        <div class="rail-pane" id="paneTwin">
+          <p style="font-size:11px;color:var(--muted);margin:0 0 12px">Digital twin · controller graph. Nodes light as
+            the overlapped field fires.</p>
+          <div class="twin" id="twinGraph">
+            <div class="node" id="tnVeh">Vehicle sensor</div>
+            <div class="arrow">↓</div>
+            <div class="node" id="tnCtl">Controller</div>
+            <div class="arrow">↓ parallel control</div>
+            <div class="mods" id="tnMods"></div>
+            <div class="arrow">↓</div>
+            <div class="node" id="tnQc">Quality check</div>
+            <div class="arrow">↓</div>
+            <div class="node" id="tnEx">Exit · photo bay</div>
+          </div>
+          <div class="sec">Live engineering data</div>
+          <div class="tele">
+            <span>PLC state</span><b id="twPlc">IDLE</b>
+            <span>Safety curtain</span><b id="twSafe">CLEAR</b>
+            <span>Conveyor</span><b id="twConv">STOPPED</b>
+            <span>Active modules</span><b id="twAct">0 / 6</b>
+          </div>
+        </div>
+
+        <div class="rail-pane" id="paneEng">
+          <div class="set-row"><span>Engineering overlay</span><button class="toggle" id="engTog"
+              aria-pressed="false"><i></i></button></div>
+          <div class="set-row"><span>Conveyor mechanism</span><button class="toggle" id="convTog"
+              aria-pressed="false"><i></i></button></div>
+          <div class="sec">Envelope · modelled</div>
+          <div class="tele">
+            <span>Lane width</span><b>2.60 m</b>
+            <span>Portal height</span><b>5.90 m</b>
+            <span>Portal depth</span><b>4.80 m</b>
+            <span>Vehicle centerline</span><b>z = 0</b>
+            <span>Textile stroke</span><b>1.80 m</b>
+            <span>Air-knife gap</span><b>120 mm</b>
+          </div>
+          <div class="sec">Conveyor</div>
+          <div class="ctrl-row">
+            <button class="btn" id="cvStart">Start</button>
+            <button class="btn" id="cvStop">Stop</button>
+          </div>
+          <div class="lbl" style="margin-top:8px">Speed</div>
+          <input type="range" id="cvSpd" min="0.4" max="2" step="0.1" value="1"
+            style="width:100%;accent-color:var(--orange)" />
+          <div class="lbl" style="margin-top:8px">Direction</div>
+          <div class="seg"><button class="on" data-dir="1" id="cvFwd">Forward</button><button data-dir="-1"
+              id="cvRev">Reverse</button></div>
+          <div class="sec">Fault simulation · scripted</div>
+          <p style="font-size:11px;color:var(--muted);margin:0 0 8px">What happens when it breaks. Not live plant
+            faults.</p>
+          <div class="ctrl-row" id="faultBtns"></div>
+          <p style="font-size:11px;color:var(--muted);margin:10px 0 0">Each scenario plays a hold, module alert, and log
+            entry. E-Stop is a full line halt.</p>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- BOTTOM DOCK -->
+    <footer id="dock">
+      <div id="transport">
+        <div class="ctrl-row">
+          <button class="btn btn-run" id="runBtn">Start</button>
+          <button class="btn" id="pauseBtn">Pause</button>
+          <button class="btn" id="resetBtn">Reset</button>
+          <button class="btn" id="replayBtn">Replay</button>
+          <button class="btn btn-stop" id="estopBtn">E-Stop</button>
+        </div>
+        <div class="ctrl-row">
+          <div class="seg" id="modeSeg">
+            <button class="on" data-mode="auto">Auto</button>
+            <button data-mode="manual">Manual</button>
+          </div>
+          <div class="seg" id="spdSeg">
+            <button data-s="0.5">0.5×</button>
+            <button class="on" data-s="1">1×</button>
+            <button data-s="2">2×</button>
+          </div>
+        </div>
+        <div class="seg" id="vehSeg">
+          <button class="on" data-v="A">A sedan</button>
+          <button data-v="B">B hatch</button>
+          <button data-v="C">C SUV</button>
+        </div>
+      </div>
+      <div id="ganttWrap">
+        <div class="gh">
+          <b>22.6-second overlapped cycle — six modules, one car, same instant</b>
+          <span id="liveTape" class="tape">Twin online</span>
+          <span id="gpct">0%</span>
+        </div>
+        <div class="jump-row"
+          style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px">
+          <div class="jump" id="jumpBar" title="Jury Q&amp;A — skip to a moment">
+            <span
+              style="font-family:var(--font-m);font-size:9px;color:var(--muted);align-self:center;margin-right:2px">JUMP:</span>
+            <button type="button" data-jump="0">0s Scan</button>
+            <button type="button" data-jump="1.9">1.9s Ion</button>
+            <button type="button" data-jump="3.8">3.8s Mist</button>
+            <button type="button" data-jump="5.6">5.6s Textile</button>
+            <button type="button" data-jump="11.3">11.3s Knife</button>
+            <button type="button" data-jump="19.5">19.5s Gloss</button>
+            <button type="button" data-jump="22.6">22.6s Done</button>
+          </div>
+          <div class="jump" id="soloBar" title="Run modules separately">
+            <span
+              style="font-family:var(--font-m);font-size:9px;color:var(--orange);font-weight:600;align-self:center;margin-right:2px">RUN
+              SEPARATE:</span>
+            <button type="button" class="btn-solo-tab" data-solo="scan">01 Scan</button>
+            <button type="button" class="btn-solo-tab" data-solo="ion">02 Ion</button>
+            <button type="button" class="btn-solo-tab" data-solo="mist">03 Mist</button>
+            <button type="button" class="btn-solo-tab" data-solo="tex">04 Textile</button>
+            <button type="button" class="btn-solo-tab" data-solo="air">05 Knife</button>
+            <button type="button" class="btn-solo-tab" data-solo="gloss">06 Gloss</button>
+            <button type="button" class="btn-solo-tab solo-all" id="soloStepAllBtn">▶ 6 Steps</button>
+          </div>
+        </div>
+        <div class="gaxis">
+          <span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>11</span><span>15</span><span>19</span><span>22.6</span>
+        </div>
+        <div id="grows" style="position:relative">
+          <div id="gph"></div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- PAGE VIEWS -->
+    <div id="views">
+
+      <article class="view" id="view-fleet">
+        <h2>Scale to 200 hubs</h2>
+        <p class="lede">The judging question is “can it go from 1 hub to 200+?” This is the model rollout — same portal,
+          same 22.6s architecture, copied across the Cars24 network. Business case, not a live fleet feed.</p>
+        <div class="seg" id="phaseSeg" style="margin-bottom:14px">
+          <button data-phase="1" class="on">Phase 1 · 3 hubs</button>
+          <button data-phase="2">Phase 2 · 50 hubs</button>
+          <button data-phase="3">Full · 200 hubs</button>
+          <button id="rollBtn" class="btn-run" style="margin-left:8px">Play rollout</button>
+        </div>
+        <div class="kpi" id="fleetKpi">
+          <div>
+            <div class="k">Hubs live</div>
+            <div class="v" id="fkHubs">3</div>
+            <div class="h">of 200 · model</div>
+          </div>
+          <div>
+            <div class="k">Network throughput</div>
+            <div class="v" id="fkThru">120</div>
+            <div class="h">cars / hour · 40 × hubs</div>
+          </div>
+          <div>
+            <div class="k">Cars cleaned today</div>
+            <div class="v" id="fkCars">120</div>
+            <div class="h">network · model</div>
+          </div>
+          <div>
+            <div class="k">Energy saved</div>
+            <div class="v" id="fkEn">60</div>
+            <div class="h">kWh vs dryer tunnels · model</div>
+          </div>
+          <div>
+            <div class="k">Rinse water</div>
+            <div class="v">0 L</div>
+            <div class="h">every hub · no drain retrofit</div>
+          </div>
+          <div>
+            <div class="k">Capex at volume</div>
+            <div class="v" id="fkCap">₹18.5L</div>
+            <div class="h">per portal · target</div>
+          </div>
+        </div>
+        <div class="scale-meters">
+          <div>
+            <span>Network cars today · modelled</span>
+            <div class="meter"><i id="fkCarsBar"></i></div>
+          </div>
+          <div>
+            <span>Energy savings vs tunnel dryers · modelled</span>
+            <div class="meter gold"><i id="fkEnBar"></i></div>
+          </div>
+        </div>
+        <div class="two fleet-grid">
+          <div class="panel map-panel">
+            <h3>India rollout · Cars24 reconditioning</h3>
+            <div id="indiaMap"></div>
+            <div class="map-legend">
+              <span><i class="d p1"></i>Phase 1 flagship</span>
+              <span><i class="d p2"></i>Phase 2 metro</span>
+              <span><i class="d p3"></i>Full network</span>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Why it copies</h3>
+            <table class="data">
+              <tbody>
+                <tr>
+                  <td>Unit architecture</td>
+                  <td>Identical 6-module portal</td>
+                </tr>
+                <tr>
+                  <td>Utilities</td>
+                  <td>0 L rinse · no effluent pit</td>
+                </tr>
+                <tr>
+                  <td>Footprint</td>
+                  <td>One lane · existing hub</td>
+                </tr>
+                <tr>
+                  <td>Staff model</td>
+                  <td>1 controller + QC, not a bay crew</td>
+                </tr>
+                <tr>
+                  <td>Phase 1</td>
+                  <td>Gurugram · Delhi NCR · Mumbai</td>
+                </tr>
+                <tr>
+                  <td>Phase 2</td>
+                  <td>50 metros · 90 days between sites</td>
+                </tr>
+                <tr>
+                  <td>Full</td>
+                  <td>200 hubs · same BOM, volume price</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="font-size:11px;color:var(--muted);margin:12px 0 0">Rollout plan for Round 3 jury · modelled, not a
+              commissioned network.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="view" id="view-roi">
+        <h2>Business case</h2>
+        <p class="lede">Target / model / business case — not experimentally validated. The numbers a hub GM can take
+          into a capex meeting.</p>
+        <div class="kpi">
+          <div>
+            <div class="k">Capex · unit 1</div>
+            <div class="v">₹18.5L</div>
+            <div class="h">₹14–16L at 200-unit volume</div>
+          </div>
+          <div>
+            <div class="k">Opex</div>
+            <div class="v">₹120</div>
+            <div class="h">per car · target</div>
+          </div>
+          <div>
+            <div class="k">Payback</div>
+            <div class="v" id="roiPay">10.1 mo</div>
+            <div class="h">at slider volume below</div>
+          </div>
+          <div>
+            <div class="k">Throughput</div>
+            <div class="v">40 / hr</div>
+            <div class="h">22.6s process · ~90s door-to-door</div>
+          </div>
+        </div>
+        <div class="two">
+          <div class="panel">
+            <h3>Unit economics · one hub</h3>
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>Line</th>
+                  <th>Model</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Process cycle</td>
+                  <td>22.60 s target</td>
+                </tr>
+                <tr>
+                  <td>Door-to-door</td>
+                  <td>~90 s including QC</td>
+                </tr>
+                <tr>
+                  <td>Cars / hour</td>
+                  <td>40</td>
+                </tr>
+                <tr>
+                  <td>Rinse water</td>
+                  <td>0 L</td>
+                </tr>
+                <tr>
+                  <td>Total liquid / car</td>
+                  <td>&lt; 2.0 L</td>
+                </tr>
+                <tr>
+                  <td>Energy / car</td>
+                  <td>0.5 kWh est.</td>
+                </tr>
+                <tr>
+                  <td>Vs 4-min expert manual</td>
+                  <td>10×</td>
+                </tr>
+                <tr>
+                  <td>Opex / car</td>
+                  <td>₹120 target</td>
+                </tr>
+                <tr class="tot">
+                  <td>Capex (unit 1)</td>
+                  <td>₹18.5 lakh</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="font-size:11px;color:var(--muted);margin:10px 0 6px">Volume slider · payback 8–15 month band</p>
+            <input type="range" id="roiCpd" min="30" max="120" value="60"
+              style="width:100%;accent-color:var(--orange)" />
+            <div style="display:flex;justify-content:space-between;font-family:var(--font-m);font-size:12px"><span
+                id="roiCpdV">60 cars/day</span><b id="roiPay2">— months</b></div>
+          </div>
+          <div class="panel">
+            <h3>200-hub network · modelled</h3>
+            <table class="data">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>1 hub</th>
+                  <th>200 hubs</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Portals</td>
+                  <td>1</td>
+                  <td>200</td>
+                </tr>
+                <tr>
+                  <td>Peak cars / hour</td>
+                  <td>40</td>
+                  <td>8,000</td>
+                </tr>
+                <tr>
+                  <td>Rinse water / day</td>
+                  <td>0 L</td>
+                  <td>0 L</td>
+                </tr>
+                <tr>
+                  <td>Capex at unit-1 price</td>
+                  <td>₹18.5L</td>
+                  <td>₹37 Cr</td>
+                </tr>
+                <tr>
+                  <td>Capex at volume price</td>
+                  <td>₹15L</td>
+                  <td>₹30 Cr</td>
+                </tr>
+                <tr>
+                  <td>Opex @ 60 cars/day</td>
+                  <td>₹7.2k/day</td>
+                  <td>₹14.4L/day</td>
+                </tr>
+                <tr class="tot">
+                  <td>Payback band</td>
+                  <td>8–15 mo</td>
+                  <td>same per hub</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="font-size:11px;color:var(--muted);margin:12px 0 0">No drainage retrofit is the scale unlock —
+              every hub already has a lane.</p>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:16px" id="compPanel">
+          <h3>Incumbent vs Surface Reset · modelled</h3>
+          <table class="data comp">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Expert manual</th>
+                <th>Tunnel wash</th>
+                <th>Surface Reset</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Process cycle</td>
+                <td>4 min</td>
+                <td>~90 s</td>
+                <td>22.60 s</td>
+              </tr>
+              <tr>
+                <td>Rinse water / car</td>
+                <td>80–150 L</td>
+                <td>~40 L</td>
+                <td>0 L</td>
+              </tr>
+              <tr>
+                <td>Total liquid / car</td>
+                <td>high</td>
+                <td>~40 L</td>
+                <td>&lt; 2.0 L</td>
+              </tr>
+              <tr>
+                <td>Staff model</td>
+                <td>Bay crew</td>
+                <td>Line crew</td>
+                <td>1 controller + QC</td>
+              </tr>
+              <tr>
+                <td>Drain retrofit</td>
+                <td>n/a</td>
+                <td>required</td>
+                <td>none</td>
+              </tr>
+              <tr class="tot">
+                <td>Bottleneck</td>
+                <td>sequence</td>
+                <td>water + dry</td>
+                <td>removed</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size:11px;color:var(--muted);margin:10px 0 0">Comparison is a business case, not a measured
+            bake-off.</p>
+        </div>
+      </article>
+
+      <article class="view" id="view-dashboard">
+        <h2>Operator console</h2>
+        <p class="lede">Shift view — what a hub controller sees. Queue, polymer, and cycle figures are modelled for this
+          twin, not a live plant feed.</p>
+        <div class="ops-alerts" id="opsAlerts">
+          <div class="alert ok" id="alLine"><b>Line</b><span>Clear · 22.6s program armed</span></div>
+          <div class="alert warn" id="alPoly"><b>Polymer</b><span>Reserve 18% · reorder this shift</span></div>
+          <div class="alert" id="alQ"><b>Queue</b><span id="opsQtxt">4 cars on the inbound lane</span></div>
+        </div>
+        <div class="kpi">
+          <div>
+            <div class="k">This shift</div>
+            <div class="v" id="opsShift">127</div>
+            <div class="h">cars · modelled</div>
+          </div>
+          <div>
+            <div class="k">Avg cycle</div>
+            <div class="v" id="opsAvg">22.4 s</div>
+            <div class="h">process · target 22.6</div>
+          </div>
+          <div>
+            <div class="k">Heavy-soil diversions</div>
+            <div class="v" id="opsHeavy">3</div>
+            <div class="h">60s pre-cycle · keeps the 22.6s promise</div>
+          </div>
+          <div>
+            <div class="k">Queue now</div>
+            <div class="v" id="opsQ">4</div>
+            <div class="h">inbound lane</div>
+          </div>
+          <div>
+            <div class="k">Cars processed</div>
+            <div class="v" id="kCars">0</div>
+            <div class="h">today · simulated</div>
+          </div>
+          <div>
+            <div class="k">Avg cycle</div>
+            <div class="v">22.6 s</div>
+            <div class="h">target process</div>
+          </div>
+          <div>
+            <div class="k">Door-to-door</div>
+            <div class="v">~90 s</div>
+            <div class="h">target including QC</div>
+          </div>
+          <div>
+            <div class="k">Throughput</div>
+            <div class="v">40</div>
+            <div class="h">cars / hour · model</div>
+          </div>
+          <div>
+            <div class="k">Rinse water</div>
+            <div class="v">0 L</div>
+            <div class="h">per car</div>
+          </div>
+          <div>
+            <div class="k">Liquid</div>
+            <div class="v">&lt;2 L</div>
+            <div class="h">total chemistry / car</div>
+          </div>
+          <div>
+            <div class="k">Energy</div>
+            <div class="v">0.5</div>
+            <div class="h">kWh / car · estimate</div>
+          </div>
+          <div>
+            <div class="k">Vs manual</div>
+            <div class="v">10×</div>
+            <div class="h">vs 4-min expert process</div>
+          </div>
+        </div>
+        <div class="two">
+          <div class="panel">
+            <h3>Throughput · modelled</h3>
+            <canvas class="chart" id="chThru" width="640" height="160"></canvas>
+          </div>
+          <div class="panel">
+            <h3>Economics · capex BOM (₹ lakh)</h3>
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>₹ L</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Gantry frame + conveyor</td>
+                  <td>4.0</td>
+                </tr>
+                <tr>
+                  <td>Conformal textile array</td>
+                  <td>4.5</td>
+                </tr>
+                <tr>
+                  <td>Vision + edge compute</td>
+                  <td>2.2</td>
+                </tr>
+                <tr>
+                  <td>Air-knife blowers</td>
+                  <td>2.4</td>
+                </tr>
+                <tr>
+                  <td>PLC + safety</td>
+                  <td>1.2</td>
+                </tr>
+                <tr>
+                  <td>Ionizer bars</td>
+                  <td>0.9</td>
+                </tr>
+                <tr>
+                  <td>Rinseless mist system</td>
+                  <td>0.9</td>
+                </tr>
+                <tr>
+                  <td>SiO₂ gloss applicator</td>
+                  <td>0.6</td>
+                </tr>
+                <tr>
+                  <td>Enclosure + install</td>
+                  <td>1.8</td>
+                </tr>
+                <tr class="tot">
+                  <td>Total (unit 1) · ₹14–16L at volume</td>
+                  <td>18.5</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="font-size:11px;color:var(--muted);margin:10px 0 0">Opex target ~₹120/car · payback 8–15 months ·
+              business case</p>
+            <input type="range" id="cpd" min="30" max="120" value="60"
+              style="width:100%;accent-color:var(--orange);margin-top:8px" />
+            <div style="display:flex;justify-content:space-between;font-family:var(--font-m);font-size:12px"><span
+                id="cpdV">60 cars/day</span><b id="payV">— months</b></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="view" id="view-analytics">
+        <h2>Analytics</h2>
+        <p class="lede">Hub model over selectable windows. All series are simulated from the digital twin, not live
+          plant data.</p>
+        <div class="seg" id="rangeSeg" style="margin-bottom:16px">
+          <button class="on" data-r="live">Live</button>
+          <button data-r="1h">1 hour</button>
+          <button data-r="today">Today</button>
+          <button data-r="week">Week</button>
+        </div>
+        <div class="kpi">
+          <div>
+            <div class="k">Success rate</div>
+            <div class="v" id="aSucc">99.2%</div>
+            <div class="h">modelled</div>
+          </div>
+          <div>
+            <div class="k">Queue time</div>
+            <div class="v" id="aQ">~45 s</div>
+            <div class="h">mean wait · model</div>
+          </div>
+          <div>
+            <div class="k">Water saved</div>
+            <div class="v" id="aWat">0 L</div>
+            <div class="h">vs rinse process</div>
+          </div>
+          <div>
+            <div class="k">Uptime target</div>
+            <div class="v">99.2%</div>
+            <div class="h">design case</div>
+          </div>
+        </div>
+        <div class="two">
+          <div class="panel">
+            <h3>Cycle time distribution</h3><canvas class="chart" id="chCyc" width="640" height="160"></canvas>
+          </div>
+          <div class="panel">
+            <h3>Module utilization</h3><canvas class="chart" id="chUtil" width="640" height="160"></canvas>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:16px">
+          <h3>Quality score · CQS</h3><canvas class="chart" id="chCqs" width="960" height="140"></canvas>
+        </div>
+        <div class="panel" style="margin-top:16px">
+          <h3>Throughput · live twin</h3>
+          <canvas class="chart" id="chLive" width="960" height="120"></canvas>
+          <p style="font-size:11px;color:var(--muted);margin:8px 0 0">Series generated from this session’s cycle clock.
+            Not a historian.</p>
+        </div>
+      </article>
+
+      <article class="view" id="view-quality">
+        <h2>Quality</h2>
+        <p class="lede">Inspection arch scores every panel against the Cars24 standard. Values below are simulation
+          estimates.</p>
+        <div class="ba-strip">
+          <div class="ba-stage">
+            <div class="ba-car" id="baBefore">
+              <span class="ba-tag">Before · inbound</span>
+              <svg viewBox="0 0 220 90" class="car-svg dirty">
+                <use href="#carSil" />
+              </svg>
+            </div>
+            <div class="ba-gauge">
+              <svg viewBox="0 0 120 70" id="baGauge">
+                <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="rgba(243,240,232,.12)" stroke-width="8" />
+                <path id="baArc" d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="#FF6B1A" stroke-width="8"
+                  stroke-linecap="square" pathLength="100" stroke-dasharray="35 100" />
+                <text x="60" y="52" text-anchor="middle" fill="#F3F0E8" font-size="22" font-family="Barlow Condensed"
+                  font-weight="600" id="baPct">35%</text>
+                <text x="60" y="66" text-anchor="middle" fill="#7C7870" font-size="7" font-family="IBM Plex Mono"
+                  letter-spacing="1">CLEANLINESS · SIM</text>
+              </svg>
+              <button class="btn btn-run" id="baPlay">Play surface reset</button>
+            </div>
+            <div class="ba-car" id="baAfter">
+              <span class="ba-tag live">After · 22.60 s</span>
+              <svg viewBox="0 0 220 90" class="car-svg">
+                <use href="#carSil" />
+              </svg>
+            </div>
+          </div>
+          <p class="ba-note">Dust overlay lifts as the overlapped field fires. Gloss and hydrophobicity are simulation
+            estimates — not measured GU.</p>
+        </div>
+        <svg width="0" height="0" style="position:absolute">
+          <defs>
+            <g id="carSil">
+              <path d="M18,62 L28,62 C32,48 40,38 58,36 L78,22 H148 L168,36 C186,38 196,50 200,62 L208,62 V70 H18 Z"
+                fill="#3a3f48" />
+              <rect x="70" y="26" width="70" height="16" rx="2" fill="#1a222c" />
+              <circle cx="52" cy="68" r="12" fill="#111" />
+              <circle cx="52" cy="68" r="6" fill="#c9ced6" />
+              <circle cx="168" cy="68" r="12" fill="#111" />
+              <circle cx="168" cy="68" r="6" fill="#c9ced6" />
+            </g>
+          </defs>
+        </svg>
+        <div class="two">
+          <div class="panel">
+            <h3>Last cycle · simulation estimate</h3>
+            <div id="qcFull"></div>
+          </div>
+          <div class="panel">
+            <h3>Scan demo — dirt triage</h3>
+            <p style="font-size:12px;color:var(--ink-2);margin:0 0 10px">Point a webcam at a surface or upload a panel
+              photo. Zones classify by luminance deviation — the same logic that routes standard cars to 22.6s and heavy
+              soil to a 60s pre-cycle.</p>
+            <div class="ctrl-row" style="margin-bottom:10px">
+              <button class="btn btn-run" id="camStart">Start webcam</button>
+              <button class="btn" id="upBtn">Upload photo</button>
+              <input type="file" id="upFile" accept="image/*" hidden />
+              <button class="btn" id="analyzeBtn">Analyze frame</button>
+            </div>
+            <div id="feedWrap">
+              <video id="vid" autoplay playsinline muted></video>
+              <img id="scanImg" alt="" hidden />
+              <div id="gridOv"></div>
+            </div>
+            <div id="verdict">Awaiting frame…</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="view" id="view-log">
+        <h2>System log</h2>
+        <p class="lede">Controller events from this session. Simulated twin — not a plant historian.</p>
+        <div class="log-list" id="logFull"></div>
+      </article>
+
+      <article class="view" id="view-maintenance">
+        <h2>Maintenance</h2>
+        <p class="lede">Wear model for jury demonstration. Hours and remaining life are simulated, not measured.</p>
+        <div class="panel health" id="maintRows"></div>
+      </article>
+
+      <article class="view" id="view-settings">
+        <h2>Settings</h2>
+        <p class="lede">Session preferences. The twin always labels modelled telemetry as simulated.</p>
+        <div class="panel">
+          <div class="set-row"><span>Presenter / jury mode</span><button class="btn" id="presBtn">Enter
+              presenter</button></div>
+          <div class="set-row"><span>Replay opening cinematic</span><button class="btn" id="cineReplay">Play
+              intro</button></div>
+          <div class="set-row"><span>Sound design (synthesized, no samples)</span><button class="toggle on" id="sfxBtn2"
+              aria-pressed="true"><i></i></button></div>
+          <div class="set-row"><span>Next vehicle: heavy soil (60s pre-cycle)</span><button class="toggle" id="heavyBtn"
+              aria-pressed="false"><i></i></button></div>
+          <div class="set-row"><span>Reduce particles (performance)</span><button class="toggle" id="lofxBtn"
+              aria-pressed="false"><i></i></button></div>
+          <div class="set-row"><span>Keyboard: Space start/pause · R reset · E overlay · P presenter · J skip-to · 1–6
+              cameras · Esc exit</span><span class="sim-tag">mapped</span></div>
+        </div>
+      </article>
+
+      <article class="view" id="view-modules">
+        <h2>CARS24 Automated Machine Stations</h2>
+        <p class="lede">In real-world Cars24 Mega Refurbishment Labs (MRLs), vehicles move along a continuous automated
+          line powered by <b>six distinct specialized machines</b>. Click <b>Solo demo</b> on any machine to inspect it
+          in 3D, or run the full line in Sim.</p>
+
+        <div class="mod-grid" id="modGrid">
+
+          <!-- 01 SCAN -->
+          <div class="mod-card" id="mc_scan" data-mod="scan">
+            <div class="mc-header">
+              <div class="mc-num" style="background:#38BDF8;color:#0b0c0e">01</div>
+              <div class="mc-title">
+                <b>Station 01 · 3D LiDAR Profiler</b>
+                <span>t = 0 — 1.9 s · Machine 1</span>
+              </div>
+              <div class="mc-bar-wrap">
+                <div class="mc-bar" style="left:0%;width:8.4%;background:#38BDF8"></div>
+              </div>
+            </div>
+            <div class="mc-body">
+              <div class="mc-vis scan-vis">
+                <svg viewBox="0 0 120 60" class="mc-svg">
+                  <rect x="10" y="20" width="100" height="30" rx="2" fill="#1a1d22" stroke="rgba(56,189,248,.3)"
+                    stroke-width="1" />
+                  <line x1="10" y1="35" x2="110" y2="35" stroke="#38BDF8" stroke-width="1.5" stroke-dasharray="3,3"
+                    class="scan-line" />
+                  <circle cx="10" cy="35" r="3" fill="#38BDF8" />
+                  <circle cx="110" cy="35" r="3" fill="#38BDF8" />
+                  <rect x="30" y="18" width="60" height="3" fill="#38BDF8" opacity="0.6" class="scan-beam" />
+                  <text x="60" y="12" text-anchor="middle" fill="#38BDF8" font-size="7" font-family="IBM Plex Mono">3D
+                    LiDAR + SURFACE PROFILER</text>
+                </svg>
+              </div>
+              <table class="mc-spec">
+                <tr>
+                  <td>Technology</td>
+                  <td>Solid-state LiDAR + structured-light cameras</td>
+                </tr>
+                <tr>
+                  <td>Output</td>
+                  <td>3D envelope map, contour calibration</td>
+                </tr>
+                <tr>
+                  <td>Duration</td>
+                  <td>0 – 1.9 s</td>
+                </tr>
+                <tr>
+                  <td>Action on heavy soil</td>
+                  <td>Routes to 60 s pre-cycle → 22.6 s standard</td>
+                </tr>
+                <tr>
+                  <td>Capex share</td>
+                  <td>₹2.2 L (vision + edge compute)</td>
+                </tr>
+              </table>
+              <p class="mc-note">The scan data is the first and only measurement Cars24 gets on the vehicle. Every
+                downstream module is parameterised from it. Heavy soil is triaged before it enters the cycle —
+                protecting the 22.6-second promise.</p>
+            </div>
+            <div class="mc-foot">
+              <button class="btn btn-run mc-demo" data-mod="scan">▶ Solo demo</button>
+              <button class="btn mc-jump" data-mod="scan" data-t="0">Jump to t=0 in sim</button>
+            </div>
+          </div>
+
+          <!-- 02 ION -->
+          <div class="mod-card" id="mc_ion" data-mod="ion">
+            <div class="mc-header">
+              <div class="mc-num" style="background:#A855F7;color:#0b0c0e">02</div>
+              <div class="mc-title">
+                <b>Station 02 · 25kV Ion De-Static Chamber</b>
+                <span>t = 1.9 — 4.7 s · Machine 2</span>
+              </div>
+              <div class="mc-bar-wrap">
+                <div class="mc-bar" style="left:8.4%;width:12.4%;background:#A855F7"></div>
+              </div>
+            </div>
+            <div class="mc-body">
+              <div class="mc-vis ion-vis">
+                <svg viewBox="0 0 120 60" class="mc-svg">
+                  <rect x="10" y="20" width="100" height="30" rx="2" fill="#1a1d22" stroke="rgba(168,85,247,.3)"
+                    stroke-width="1" />
+                  <line x1="15" y1="18" x2="15" y2="52" stroke="#A855F7" stroke-width="2" class="ion-bar" />
+                  <line x1="105" y1="18" x2="105" y2="52" stroke="#A855F7" stroke-width="2" class="ion-bar" />
+                  <path d="M25,35 Q40,25 55,35 Q70,45 85,35 Q95,28 105,35" fill="none" stroke="#A855F7" stroke-width="1"
+                    opacity="0.5" class="ion-stream" />
+                  <path d="M25,30 Q40,40 55,30 Q70,20 85,30 Q95,37 105,30" fill="none" stroke="#A855F7" stroke-width="1"
+                    opacity="0.3" class="ion-stream" />
+                  <text x="60" y="12" text-anchor="middle" fill="#A855F7" font-size="7"
+                    font-family="IBM Plex Mono">25kV STATIC DISCHARGE</text>
+                </svg>
+              </div>
+              <table class="mc-spec">
+                <tr>
+                  <td>Technology</td>
+                  <td>25kV high-voltage pulse ionizing bar array</td>
+                </tr>
+                <tr>
+                  <td>Output</td>
+                  <td>Electrostatic charge neutralized, particulate unbonded</td>
+                </tr>
+                <tr>
+                  <td>Duration</td>
+                  <td>1.9 – 4.7 s (overlaps mist at 3.8 s)</td>
+                </tr>
+                <tr>
+                  <td>Air velocity</td>
+                  <td>18 ± 2 m/s laminar flow</td>
+                </tr>
+                <tr>
+                  <td>Capex share</td>
+                  <td>₹0.9 L (ionizer bars + transformer)</td>
+                </tr>
+              </table>
+              <p class="mc-note">Dust bonded by static charge is the hardest contamination to remove without water.
+                Ionized air breaks the electrostatic bond before any contact is made — so the microfiber array lifts
+                clean instead of smearing.</p>
+            </div>
+            <div class="mc-foot">
+              <button class="btn btn-run mc-demo" data-mod="ion">▶ Solo demo</button>
+              <button class="btn mc-jump" data-mod="ion" data-t="1.9">Jump to t=1.9 in sim</button>
+            </div>
+          </div>
+
+          <!-- 03 MIST -->
+          <div class="mod-card" id="mc_mist" data-mod="mist">
+            <div class="mc-header">
+              <div class="mc-num" style="background:#2DD4BF;color:#0b0c0e">03</div>
+              <div class="mc-title">
+                <b>Station 03 · Polymer Encapsulator</b>
+                <span>t = 3.8 — 7.5 s · Machine 3</span>
+              </div>
+              <div class="mc-bar-wrap">
+                <div class="mc-bar" style="left:16.8%;width:16.4%;background:#2DD4BF"></div>
+              </div>
+            </div>
+            <div class="mc-body">
+              <div class="mc-vis mist-vis">
+                <svg viewBox="0 0 120 60" class="mc-svg">
+                  <rect x="10" y="20" width="100" height="30" rx="2" fill="#1a1d22" stroke="rgba(45,212,191,.3)"
+                    stroke-width="1" />
+                  <circle cx="35" cy="14" r="4" fill="#2DD4BF" opacity="0.7" class="mist-drop" />
+                  <circle cx="60" cy="12" r="5" fill="#2DD4BF" opacity="0.5" class="mist-drop" />
+                  <circle cx="85" cy="14" r="4" fill="#2DD4BF" opacity="0.7" class="mist-drop" />
+                  <circle cx="48" cy="22" r="3" fill="#2DD4BF" opacity="0.4" class="mist-drop" />
+                  <circle cx="72" cy="20" r="3.5" fill="#2DD4BF" opacity="0.35" class="mist-drop" />
+                  <text x="60" y="55" text-anchor="middle" fill="#2DD4BF" font-size="7"
+                    font-family="IBM Plex Mono">RINSELESS · &lt; 2 L TOTAL</text>
+                </svg>
+              </div>
+              <table class="mc-spec">
+                <tr>
+                  <td>Chemistry</td>
+                  <td>Rinseless nano-polymer encapsulant</td>
+                </tr>
+                <tr>
+                  <td>Volume / car</td>
+                  <td>&lt; 2.0 L total liquid, 0 L rinse water</td>
+                </tr>
+                <tr>
+                  <td>Duration</td>
+                  <td>3.8 – 7.5 s (overlaps ion at 3.8 s, textile at 5.6 s)</td>
+                </tr>
+                <tr>
+                  <td>Function</td>
+                  <td>Polymer encapsulates soil particle → safe to wipe</td>
+                </tr>
+                <tr>
+                  <td>Capex share</td>
+                  <td>₹0.9 L (mist manifold + dosing pump)</td>
+                </tr>
+              </table>
+              <p class="mc-note">Zero rinse water is the single biggest scale unlock. Every Cars24 hub already has a
+                lane — but none have an effluent pit for a tunnel wash. Polymer mist replaces the water flood with
+                chemistry. No drain retrofit required.</p>
+            </div>
+            <div class="mc-foot">
+              <button class="btn btn-run mc-demo" data-mod="mist">▶ Solo demo</button>
+              <button class="btn mc-jump" data-mod="mist" data-t="3.8">Jump to t=3.8 in sim</button>
+            </div>
+          </div>
+
+          <!-- 04 TEXTILE -->
+          <div class="mod-card mod-card--hero" id="mc_tex" data-mod="tex">
+            <div class="mc-header">
+              <div class="mc-num" style="background:#FF6B1A;color:#0b0c0e">04</div>
+              <div class="mc-title">
+                <b>Station 04 · Robotic Textile Machine</b>
+                <span>t = 5.6 — 15.1 s · Machine 4 (FLAGSHIP)</span>
+              </div>
+              <div class="mc-bar-wrap">
+                <div class="mc-bar" style="left:24.8%;width:42.0%;background:#FF6B1A"></div>
+              </div>
+            </div>
+            <div class="mc-body">
+              <div class="mc-vis tex-vis">
+                <svg viewBox="0 0 120 60" class="mc-svg">
+                  <rect x="10" y="20" width="100" height="30" rx="2" fill="#1a1d22" stroke="rgba(255,107,26,.3)"
+                    stroke-width="1" />
+                  <!-- roof pads -->
+                  <rect x="20" y="18" width="80" height="8" rx="1" fill="#FF6B1A" opacity="0.7" class="tex-pad" />
+                  <!-- side pads -->
+                  <rect x="10" y="22" width="7" height="24" rx="1" fill="#FF6B1A" opacity="0.5" class="tex-pad" />
+                  <rect x="103" y="22" width="7" height="24" rx="1" fill="#FF6B1A" opacity="0.5" class="tex-pad" />
+                  <!-- car body -->
+                  <rect x="30" y="26" width="60" height="20" rx="2" fill="#2a2f38" />
+                  <text x="60" y="12" text-anchor="middle" fill="#FF6B1A" font-size="7" font-family="IBM Plex Mono">ROOF
+                    + SIDES · WHOLE FIELD AT ONCE</text>
+                </svg>
+              </div>
+              <table class="mc-spec">
+                <tr>
+                  <td>Technology</td>
+                  <td>Segmented conformal microfiber array</td>
+                </tr>
+                <tr>
+                  <td>Coverage</td>
+                  <td>Roof + both sides simultaneously</td>
+                </tr>
+                <tr>
+                  <td>Duration</td>
+                  <td>5.6 – 15.1 s · longest, highest coverage</td>
+                </tr>
+                <tr>
+                  <td>Stroke</td>
+                  <td>1.80 m compliance stroke per segment</td>
+                </tr>
+                <tr>
+                  <td>Capex share</td>
+                  <td>₹4.5 L · largest single BOM item</td>
+                </tr>
+              </table>
+              <p class="mc-note">This is the innovation. Sequential detailing does roof, then door, then bonnet. The
+                conformal array does all of them at once. Simultaneous microfiber contact vs 4 minutes of
+                sequential hand work. The other 5 modules exist to make this one work at 22.6 seconds.</p>
+            </div>
+            <div class="mc-foot">
+              <button class="btn btn-run mc-demo" data-mod="tex">▶ Solo demo</button>
+              <button class="btn mc-jump" data-mod="tex" data-t="5.6">Jump to t=5.6 in sim</button>
+            </div>
+          </div>
+
+          <!-- 05 AIR-KNIFE -->
+          <div class="mod-card" id="mc_air" data-mod="air">
+            <div class="mc-header">
+              <div class="mc-num" style="background:#F59E0B;color:#0b0c0e">05</div>
+              <div class="mc-title">
+                <b>Station 05 · Air-Knife Drying Gantry</b>
+                <span>t = 11.3 — 18.8 s · Machine 5</span>
+              </div>
+              <div class="mc-bar-wrap">
+                <div class="mc-bar" style="left:50.0%;width:33.2%;background:#F59E0B"></div>
+              </div>
+            </div>
+            <div class="mc-body">
+              <div class="mc-vis air-vis">
+                <svg viewBox="0 0 120 60" class="mc-svg">
+                  <rect x="10" y="20" width="100" height="30" rx="2" fill="#1a1d22" stroke="rgba(245,158,11,.3)"
+                    stroke-width="1" />
+                  <!-- air blower units -->
+                  <rect x="12" y="22" width="6" height="26" rx="1" fill="#F59E0B" opacity="0.8" />
+                  <rect x="102" y="22" width="6" height="26" rx="1" fill="#F59E0B" opacity="0.8" />
+                  <!-- air sheets -->
+                  <line x1="18" y1="28" x2="102" y2="28" stroke="#F59E0B" stroke-width="1.5" opacity="0.5"
+                    class="air-sheet" />
+                  <line x1="18" y1="35" x2="102" y2="35" stroke="#F59E0B" stroke-width="1" opacity="0.35"
+                    class="air-sheet" />
+                  <line x1="18" y1="42" x2="102" y2="42" stroke="#F59E0B" stroke-width="1.5" opacity="0.5"
+                    class="air-sheet" />
+                  <text x="60" y="12" text-anchor="middle" fill="#F59E0B" font-size="7"
+                    font-family="IBM Plex Mono">HIGH-VELOCITY · NO DRYING TUNNEL</text>
+                </svg>
+              </div>
+              <table class="mc-spec">
+                <tr>
+                  <td>Technology</td>
+                  <td>High-velocity centrifugal air-knife blowers</td>
+                </tr>
+                <tr>
+                  <td>Function</td>
+                  <td>Strip residual moisture, no drying tunnel</td>
+                </tr>
+                <tr>
+                  <td>Duration</td>
+                  <td>11.3 – 18.8 s (overlaps textile from 11.3 s)</td>
+                </tr>
+                <tr>
+                  <td>Air gap</td>
+                  <td>120 mm knife gap</td>
+                </tr>
+                <tr>
+                  <td>Capex share</td>
+                  <td>₹2.4 L (blowers)</td>
+                </tr>
+              </table>
+              <p class="mc-note">A tunnel dryer adds 60–90 seconds and requires a permanent structure. Air-knife sheets
+                running alongside the textile array mean the car exits dry without any additional drying stage. The
+                90-second door-to-door time depends on this.</p>
+            </div>
+            <div class="mc-foot">
+              <button class="btn btn-run mc-demo" data-mod="air">▶ Solo demo</button>
+              <button class="btn mc-jump" data-mod="air" data-t="11.3">Jump to t=11.3 in sim</button>
+            </div>
+          </div>
+
+          <!-- 06 GLOSS -->
+          <div class="mod-card" id="mc_gloss" data-mod="gloss">
+            <div class="mc-header">
+              <div class="mc-num" style="background:#EC4899;color:#0b0c0e">06</div>
+              <div class="mc-title">
+                <b>Station 06 · SiO₂ Nano-Coating Finisher</b>
+                <span>t = 19.5 — 22.6 s · Machine 6</span>
+              </div>
+              <div class="mc-bar-wrap">
+                <div class="mc-bar" style="left:86.3%;width:13.7%;background:#EC4899"></div>
+              </div>
+            </div>
+            <div class="mc-body">
+              <div class="mc-vis gloss-vis">
+                <svg viewBox="0 0 120 60" class="mc-svg">
+                  <rect x="10" y="20" width="100" height="30" rx="2" fill="#1a1d22" stroke="rgba(236,72,153,.3)"
+                    stroke-width="1" />
+                  <rect x="30" y="26" width="60" height="20" rx="2" fill="#2a2f38" />
+                  <!-- gloss shimmer -->
+                  <ellipse cx="52" cy="30" rx="12" ry="4" fill="#EC4899" opacity="0.3" class="gloss-shim" />
+                  <ellipse cx="75" cy="28" rx="8" ry="3" fill="#FFD200" opacity="0.2" class="gloss-shim" />
+                  <ellipse cx="62" cy="38" rx="15" ry="5" fill="#EC4899" opacity="0.2" class="gloss-shim" />
+                  <text x="60" y="12" text-anchor="middle" fill="#EC4899" font-size="7" font-family="IBM Plex Mono">SiO₂
+                    HYDROPHOBIC COAT</text>
+                </svg>
+              </div>
+              <table class="mc-spec">
+                <tr>
+                  <td>Chemistry</td>
+                  <td>Ultra-thin SiO₂ hydrophobic layer</td>
+                </tr>
+                <tr>
+                  <td>Output</td>
+                  <td>Gloss, surface uniformity, hydrophobicity</td>
+                </tr>
+                <tr>
+                  <td>Duration</td>
+                  <td>19.5 – 22.6 s · final 3.1 seconds</td>
+                </tr>
+                <tr>
+                  <td>Gloss estimate</td>
+                  <td>58 GU → 88–94 GU (simulation)</td>
+                </tr>
+                <tr>
+                  <td>Capex share</td>
+                  <td>₹0.6 L (gloss applicator)</td>
+                </tr>
+              </table>
+              <p class="mc-note">The outbound car looks better than it did when it arrived. SiO₂ is not just aesthetics
+                — it is the product quality proof. A glossmeter at QC gives the hub GM a number to show customers. This
+                is what converts reconditioning from a cost centre to a revenue line.</p>
+            </div>
+            <div class="mc-foot">
+              <button class="btn btn-run mc-demo" data-mod="gloss">▶ Solo demo</button>
+              <button class="btn mc-jump" data-mod="gloss" data-t="19.5">Jump to t=19.5 in sim</button>
+            </div>
+          </div>
+
+        </div><!-- /mod-grid -->
+
+        <!-- Timeline strip at bottom of modules page -->
+        <div class="panel" style="margin-top:20px">
+          <h3>Overlap map — why 22.6 seconds</h3>
+          <p style="font-size:12px;color:var(--muted);margin:0 0 12px">Each bar = one module window. Four modules fire
+            simultaneously at peak overlap. Sequential would be 4 minutes.</p>
+          <div class="mpage-gantt">
+            <div class="mg-axis">
+              <span>0s</span><span>1.9s</span><span>3.8s</span><span>5.6s</span><span>7.5s</span>
+              <span>11.3s</span><span>15.1s</span><span>18.8s</span><span>19.5s</span><span>22.6s</span>
+            </div>
+            <div class="mg-row"><span style="color:#38BDF8">Scan</span>
+              <div class="mg-track">
+                <div class="mg-span" style="left:0%;width:8.4%;background:#38BDF8"></div>
+              </div><b>1.9s</b>
+            </div>
+            <div class="mg-row"><span style="color:#A855F7">Ion</span>
+              <div class="mg-track">
+                <div class="mg-span" style="left:8.4%;width:12.4%;background:#A855F7"></div>
+              </div><b>2.8s</b>
+            </div>
+            <div class="mg-row"><span style="color:#2DD4BF">Mist</span>
+              <div class="mg-track">
+                <div class="mg-span" style="left:16.8%;width:16.4%;background:#2DD4BF"></div>
+              </div><b>3.7s</b>
+            </div>
+            <div class="mg-row"><span style="color:#FF6B1A">Textile</span>
+              <div class="mg-track">
+                <div class="mg-span" style="left:24.8%;width:42.0%;background:#FF6B1A"></div>
+              </div><b>9.5s</b>
+            </div>
+            <div class="mg-row"><span style="color:#F59E0B">Air</span>
+              <div class="mg-track">
+                <div class="mg-span" style="left:50.0%;width:33.2%;background:#F59E0B"></div>
+              </div><b>7.5s</b>
+            </div>
+            <div class="mg-row"><span style="color:#EC4899">Gloss</span>
+              <div class="mg-track">
+                <div class="mg-span" style="left:86.3%;width:13.7%;background:#EC4899"></div>
+              </div><b>3.1s</b>
+            </div>
+          </div>
+          <div class="mg-compare">
+            <div><b style="color:var(--fault)">Sequential</b><span>~4 minutes · one module at a time</span></div>
+            <div class="mg-arr">→</div>
+            <div><b style="color:var(--live)">Parallel</b><span>22.6 seconds · overlapped field</span></div>
+            <div class="mg-arr">→</div>
+            <div><b style="color:var(--orange)">10×</b><span>faster vs expert manual</span></div>
+          </div>
+        </div>
+
+      </article>
+
     </div>
   </div>
 
-  <div id="scanTab">
-    <div class="inner">
-      <h3>Scan Demo — dirt triage on a real image</h3>
-      <p class="sub">The portal's first module decides the program. Point a webcam at any surface (or upload a photo of a car panel); each zone is classified by luminance deviation — exactly how the portal routes standard cars to the 24s program and heavy soil to a 60s pre-cycle.</p>
-      <div id="scanBtns">
-        <button class="btn btn-hero" id="camStart">Start webcam</button>
-        <button class="btn btn-ghost" id="upBtn">Upload photo</button>
-        <input type="file" id="upFile" accept="image/*" style="display:none"/>
-        <button class="btn btn-ghost" id="analyzeBtn">Analyze frame</button>
-      </div>
-      <div id="feedWrap">
-        <video id="vid" autoplay playsinline muted></video>
-        <img id="scanImg" style="display:none" alt=""/>
-        <div id="gridOv"></div>
-      </div>
-      <div id="verdict">Awaiting frame…</div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-'use strict';
-/* ============ boot / offline ============ */
-if(typeof THREE==='undefined'){document.getElementById('offline').style.display='flex';}
-else{ try{ APP(); }catch(err){ const o=document.getElementById('offline');o.style.display='flex';
-  o.innerHTML='<b style="font-size:16px">Simulation error</b><span>'+String(err).slice(0,200)+'</span>';console.error(err);} }
-function APP(){
-const $=id=>document.getElementById(id);
-const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
-const seg=(t,s,e)=>clamp((t-s)/(e-s),0,1);
-const lerp=(a,b,u)=>a+(b-a)*u;
-const ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
-const tri=(t,s,e)=>Math.sin(seg(t,s,e)*Math.PI);
-const rnd=(a,b)=>a+Math.random()*(b-a);
-
-/* ============ module spec (sacred timings) ============ */
-const MODS=[
- {k:'scan', s:0, e:2,  nm:'Vehicle scan',        col:'#64748B', ds:'Cameras map the outline and build a per-panel soil heatmap. Heavy soil is triaged to a 60s pre-cycle so the 24s promise never breaks.'},
- {k:'ion',  s:2, e:5,  nm:'Ionized air curtain', col:'#A78BFA', ds:'Static charge is neutralized so dust releases before contact — TRINC documents 74% adhesion reduction on automotive paint lines.'},
- {k:'mist', s:4, e:8,  nm:'Atomized rinseless mist', col:'#38BDF8', ds:'Polymer chemistry encapsulates and lubricates soil. Under 2 L total liquid, zero rinse water — no drainage retrofit at any hub.'},
- {k:'tex',  s:6, e:16, nm:'Conformal textile array', col:'#FF8A3D', ds:'THE HERO — segmented microfiber panels descend from the roof and close from the sides on spring-loaded compliance. Every square metre wiped in the same instant: that is the 10×.'},
- {k:'air',  s:12,e:20, nm:'Air-knife extraction', col:'#FBBF24', ds:'High-velocity air sheets strip moisture and loosened soil mechanically — no evaporation wait, no drying tunnel.'},
- {k:'gloss',s:21,e:24, nm:'SiO₂ gloss mist',      col:'#F472B6', ds:'An ultra-thin hydrophobic layer leaves the paint glossy and dust-resistant for weeks — photo-ready and staying that way.'}];
-const CYCLE=24;
-
-/* ============ gantt ============ */
-const grows=$('grows');
-MODS.forEach((m,i)=>{const r=document.createElement('div');r.className='grow';
- r.innerHTML=`<div class="gl" id="gl_${m.k}" style="color:${m.col}">${i+1}·${m.nm.split(' ')[0].toUpperCase()}</div>
- <div class="gtrack"><div class="gspan" id="gs_${m.k}" style="left:${m.s/CYCLE*100}%;width:${(m.e-m.s)/CYCLE*100}%;background:${m.col}"></div>
- <div class="gfill" id="gf_${m.k}" style="left:${m.s/CYCLE*100}%;background:${m.col}55"></div></div>`;grows.appendChild(r);});
-
-/* ============ three.js scene ============ */
-const canvas=$('c3d');
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0xbfd4e8);
-scene.fog=new THREE.Fog(0xbfd4e8,60,160);
-const camera=new THREE.PerspectiveCamera(50,2,0.1,300);
-camera.position.set(16,9,18);
-/* simple env map for paint reflections */
-(function(){
- const envScene=new THREE.Scene();
- envScene.background=new THREE.Color(0xcfe0f0);
- const sky=new THREE.Mesh(new THREE.SphereGeometry(50,16,16),new THREE.MeshBasicMaterial({color:0xdfeaf5,side:THREE.BackSide}));
- envScene.add(sky);
- const sun=new THREE.Mesh(new THREE.SphereGeometry(6,8,8),new THREE.MeshBasicMaterial({color:0xffffff}));sun.position.set(20,30,10);envScene.add(sun);
- const gnd=new THREE.Mesh(new THREE.PlaneGeometry(100,100),new THREE.MeshBasicMaterial({color:0x6b7688}));gnd.rotation.x=-Math.PI/2;gnd.position.y=-8;envScene.add(gnd);
- const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(envScene,0.04).texture;
-})();
-/* warm Indian daylight */
-scene.add(new THREE.HemisphereLight(0xfff4e0,0x5a6a78,0.75));
-const sun=new THREE.DirectionalLight(0xfff0d8,1.25);sun.position.set(24,32,14);sun.castShadow=true;
-sun.shadow.mapSize.set(2048,2048);const sd=42;sun.shadow.camera.left=-sd;sun.shadow.camera.right=sd;sun.shadow.camera.top=sd;sun.shadow.camera.bottom=-sd;sun.shadow.bias=-0.0005;
-scene.add(sun);
-
-/* minimal inline orbit control (drag rotate + wheel zoom) */
-const orbit={theta:0.7,phi:1.12,r:26,target:new THREE.Vector3(0,1.2,0),manual:false};
-let dragging=false,px=0,py=0;
-canvas.addEventListener('pointerdown',e=>{dragging=true;px=e.clientX;py=e.clientY;setCam('orbit');});
-addEventListener('pointerup',()=>dragging=false);
-addEventListener('pointermove',e=>{if(!dragging)return;orbit.theta-=(e.clientX-px)*0.005;orbit.phi=clamp(orbit.phi-(e.clientY-py)*0.005,0.25,1.5);px=e.clientX;py=e.clientY;});
-canvas.addEventListener('wheel',e=>{e.preventDefault();orbit.r=clamp(orbit.r+e.deltaY*0.02,8,80);setCam('orbit');},{passive:false});
-
-/* ============ materials / helpers ============ */
-const steel=()=>new THREE.MeshStandardMaterial({color:0x2a3450,metalness:0.85,roughness:0.4});
-const darkMatte=()=>new THREE.MeshStandardMaterial({color:0x1a2236,metalness:0.5,roughness:0.7});
-function textTex(txt,bg,fg,w,h,fs){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
- x.fillStyle=bg;x.fillRect(0,0,w,h);x.fillStyle=fg;x.font='900 '+fs+'px Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(txt,w/2,h/2+2);
- const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t;}
-
-/* ============ hub world ============ */
-/* asphalt yard */
-const yard=new THREE.Mesh(new THREE.PlaneGeometry(180,120),new THREE.MeshStandardMaterial({color:0x3d434e,roughness:0.95}));
-yard.rotation.x=-Math.PI/2;yard.receiveShadow=true;scene.add(yard);
-/* painted lane markings */
-function stripe(x,z,w,l,rot,col){const s=new THREE.Mesh(new THREE.PlaneGeometry(w,l),new THREE.MeshStandardMaterial({color:col||0xd8d341,roughness:0.8}));
- s.rotation.x=-Math.PI/2;s.rotation.z=rot||0;s.position.set(x,0.012,z);scene.add(s);return s;}
-for(let x=-34;x<=34;x+=4)stripe(x,2.6,2.2,0.16,Math.PI/2);
-for(let x=-34;x<=34;x+=4)stripe(x,-2.6,2.2,0.16,Math.PI/2);
-stripe(-20,8.5,10,0.14,Math.PI/2,0xffffff);stripe(-20,12.5,10,0.14,Math.PI/2,0xffffff);
-/* boundary fence */
-(function(){const fm=steel();
- for(let x=-60;x<=60;x+=6){const p=new THREE.Mesh(new THREE.BoxGeometry(0.14,2.2,0.14),fm);p.position.set(x,1.1,-38);p.castShadow=true;scene.add(p);}
- [0.6,1.4,2.1].forEach(y=>{const r=new THREE.Mesh(new THREE.BoxGeometry(120,0.07,0.07),fm);r.position.set(0,y,-38);scene.add(r);});
- for(let z=-38;z<=30;z+=6){const p=new THREE.Mesh(new THREE.BoxGeometry(0.14,2.2,0.14),fm);p.position.set(-60,1.1,z);scene.add(p);}
-})();
-/* QUALITY & PHOTO BAY building */
-(function(){
- const b=new THREE.Mesh(new THREE.BoxGeometry(14,6,10),new THREE.MeshStandardMaterial({color:0xe8e4da,roughness:0.9}));
- b.position.set(24,3,-14);b.castShadow=true;b.receiveShadow=true;scene.add(b);
- const roof=new THREE.Mesh(new THREE.BoxGeometry(14.8,0.4,10.8),darkMatte());roof.position.set(24,6.2,-14);scene.add(roof);
- const sign=new THREE.Mesh(new THREE.PlaneGeometry(11,1.5),new THREE.MeshBasicMaterial({map:textTex('QUALITY & PHOTO BAY','#0B1220','#2DD4BF',1024,140,64)}));
- sign.position.set(24,4.6,-8.9);scene.add(sign);
- const door=new THREE.Mesh(new THREE.PlaneGeometry(5,3.6),new THREE.MeshStandardMaterial({color:0x1a2236,roughness:0.5,metalness:0.4}));
- door.position.set(24,1.8,-8.95);scene.add(door);
- const c24=new THREE.Mesh(new THREE.PlaneGeometry(4.2,1.35),new THREE.MeshBasicMaterial({map:textTex('CARS24','#FFD21E','#0A0E1A',512,160,86)}));
- c24.position.set(17.5,5.1,-8.9);scene.add(c24);
-})();
-
-/* ============ conveyor ============ */
-const LANE={qStart:-30,portal:0,exit:10,qc:16,done:28};
-const belt=new THREE.Mesh(new THREE.BoxGeometry(56,0.14,2.6),new THREE.MeshStandardMaterial({color:0x232a38,metalness:0.4,roughness:0.6}));
-belt.position.set(-2,0.07,0);belt.receiveShadow=true;scene.add(belt);
-const beltStrips=[];
-for(let i=0;i<28;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.02,2.3),new THREE.MeshStandardMaterial({color:0x38455c,roughness:0.5,metalness:0.5}));
- s.position.set(-30+i*2,0.155,0);scene.add(s);beltStrips.push(s);}
-/* triage side pad */
-const triPad=new THREE.Mesh(new THREE.BoxGeometry(6,0.1,4),new THREE.MeshStandardMaterial({color:0x2b3345,roughness:0.8}));
-triPad.position.set(-12,0.05,6.5);triPad.receiveShadow=true;scene.add(triPad);
-const triSign=new THREE.Mesh(new THREE.PlaneGeometry(4.6,0.8),new THREE.MeshBasicMaterial({map:textTex('PRE-CYCLE PAD · 60s','#0B1220','#FBBF24',760,110,52)}));
-triSign.position.set(-12,2.2,8.4);scene.add(triSign);
-[[-14.8,4.8],[-9.2,4.8],[-14.8,8.2],[-9.2,8.2]].forEach(([x,z])=>{const p=new THREE.Mesh(new THREE.BoxGeometry(0.1,2.4,0.1),steel());p.position.set(x,1.2,z);scene.add(p);});
-
-/* ============ portal gantry ============ */
-const portal=new THREE.Group();scene.add(portal);
-(function(){
- const colG=new THREE.BoxGeometry(0.7,5.6,0.8);
- [-2.6,2.6].forEach(z=>{const c=new THREE.Mesh(colG,darkMatte());c.position.set(0,2.8,z);c.castShadow=true;portal.add(c);
-  const foot=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.3,1.3),steel());foot.position.set(0,0.15,z);portal.add(foot);
-  const accent=new THREE.Mesh(new THREE.BoxGeometry(0.08,5.0,0.08),new THREE.MeshStandardMaterial({color:0x0d3833,emissive:0x2DD4BF,emissiveIntensity:0.9}));
-  accent.position.set(0.42,2.8,z);portal.add(accent);});
- const beam=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.7,6.4),darkMatte());beam.position.set(0,5.9,0);beam.castShadow=true;portal.add(beam);
- const under=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.2,6.0),steel());under.position.set(0,5.45,0);portal.add(under);
- const sign=new THREE.Mesh(new THREE.PlaneGeometry(4.6,0.95),new THREE.MeshBasicMaterial({map:textTex('SURFACE RESET PORTAL','#0B1220','#E8EFFF',1200,190,74),transparent:false}));
- sign.position.set(0,6.65,0);portal.add(sign);
- const c24=new THREE.Mesh(new THREE.PlaneGeometry(1.9,0.62),new THREE.MeshBasicMaterial({map:textTex('CARS24','#FFD21E','#0A0E1A',512,160,84)}));
- c24.position.set(0,7.45,0);portal.add(c24);
-})();
-const portalLight=new THREE.PointLight(0x2DD4BF,0,26);portalLight.position.set(0,3.4,0);scene.add(portalLight);
-const ledStates=[];
-for(let i=0;i<8;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(0.07,8,8),new THREE.MeshStandardMaterial({color:0x1a2236,emissive:0x000000}));
- m.position.set(0.52,5.9,-2.2+i*0.63);portal.add(m);ledStates.push(m);}
-
-/* QC arch */
-const qcArch=new THREE.Group();scene.add(qcArch);qcArch.position.x=LANE.qc;
-(function(){
- [-2.2,2.2].forEach(z=>{const c=new THREE.Mesh(new THREE.BoxGeometry(0.35,4.2,0.4),steel());c.position.set(0,2.1,z);c.castShadow=true;qcArch.add(c);});
- const b=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.4,4.9),steel());b.position.set(0,4.35,0);qcArch.add(b);
- const s=new THREE.Mesh(new THREE.PlaneGeometry(2.6,0.6),new THREE.MeshBasicMaterial({map:textTex('QC SCAN','#0B1220','#2DD4BF',640,140,72)}));
- s.position.set(0,4.95,0);qcArch.add(s);
-})();
-const qcBeam=new THREE.Mesh(new THREE.PlaneGeometry(4.6,3.6),new THREE.MeshBasicMaterial({color:0x2DD4BF,transparent:true,opacity:0,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
-qcBeam.rotation.y=Math.PI/2;qcBeam.position.set(LANE.qc,1.9,0);scene.add(qcBeam);
-
-/* ============ parametric car generator ============ */
-const CAR_TYPES={
- hatchback:{len:3.6,cabL:1.7,cabH:0.62,cabX:-0.32,tailCut:0.25,h:0.82},
- sedan:{len:4.3,cabL:1.9,cabH:0.60,cabX:-0.15,tailCut:0.05,h:0.85},
- suv:{len:4.2,cabL:2.2,cabH:0.78,cabX:-0.1,tailCut:0.1,h:1.0}};
-const PALETTE=[0xf0f2f4,0xc9ced6,0x8a929e,0xb02430,0x1f4f9a];
-function dirtCanvas(intensity){const c=document.createElement('canvas');c.width=128;c.height=128;const x=c.getContext('2d');
- x.clearRect(0,0,128,128);
- const n=Math.floor(240*intensity);
- for(let i=0;i<n;i++){x.beginPath();x.arc(rnd(0,128),rnd(0,128),rnd(1,5),0,7);
-  x.fillStyle=`rgba(${86+rnd(-14,14)|0},${70+rnd(-12,12)|0},${46+rnd(-10,10)|0},${rnd(0.25,0.62)})`;x.fill();}
- const g=x.createLinearGradient(0,70,0,128);g.addColorStop(0,'rgba(80,64,42,0)');g.addColorStop(1,`rgba(70,56,36,${0.5*intensity})`);
- x.fillStyle=g;x.fillRect(0,70,128,58);
- return new THREE.CanvasTexture(c);}
-function makeWheelP(){const w=new THREE.Group();
- const tyre=new THREE.Mesh(new THREE.TorusGeometry(0.34,0.13,10,22),new THREE.MeshStandardMaterial({color:0x0c0e14,roughness:0.9}));w.add(tyre);
- const rim=new THREE.Mesh(new THREE.CylinderGeometry(0.21,0.21,0.2,18),new THREE.MeshStandardMaterial({color:0xd8dde8,metalness:1,roughness:0.25}));
- rim.rotation.x=Math.PI/2;w.add(rim);
- const sp=new THREE.Group();
- for(let i=0;i<5;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(0.36,0.06,0.05),rim.material);b.rotation.z=i*Math.PI*2/5;b.position.z=0.09;sp.add(b);}
- w.add(sp);w.userData.sp=sp;return w;}
-function makeCarP(type,color,dirtLevel){
- const cfg=CAR_TYPES[type];const car=new THREE.Group();car.userData.type=type;
- const paint=new THREE.MeshPhysicalMaterial({color,metalness:0.75,roughness:0.32,clearcoat:0.8,clearcoatRoughness:0.25,envMapIntensity:1.1});
- car.userData.paint=paint;
- const L=cfg.len,H=cfg.h;
- /* body */
- const body=new THREE.Mesh(new THREE.BoxGeometry(L,H*0.62,1.72),paint);body.position.y=0.36+H*0.31;body.castShadow=true;car.add(body);
- /* hood + boot slope pieces */
- const hood=new THREE.Mesh(new THREE.BoxGeometry(L*0.24,H*0.16,1.66),paint);hood.position.set(L*0.36,0.36+H*0.66,0);hood.rotation.z=-0.06;car.add(hood);
- const boot=new THREE.Mesh(new THREE.BoxGeometry(L*0.2,H*0.16,1.66),paint);boot.position.set(-L*0.38,0.36+H*0.63,0);boot.rotation.z=0.05;car.add(boot);
- /* cabin */
- const cab=new THREE.Mesh(new THREE.BoxGeometry(cfg.cabL,cfg.cabH,1.58),paint);cab.position.set(cfg.cabX,0.36+H*0.62+cfg.cabH*0.52,0);cab.castShadow=true;car.add(cab);
- /* glass band */
- const glass=new THREE.Mesh(new THREE.BoxGeometry(cfg.cabL*0.96,cfg.cabH*0.62,1.62),new THREE.MeshPhysicalMaterial({color:0x0e1a2c,metalness:0.3,roughness:0.06,transparent:true,opacity:0.85}));
- glass.position.copy(cab.position);glass.position.y+=cfg.cabH*0.08;car.add(glass);
- /* raked windshield */
- const ws=new THREE.Mesh(new THREE.PlaneGeometry(1.5,cfg.cabH*1.15),glass.material);
- ws.position.set(cfg.cabX+cfg.cabL/2+0.14,cab.position.y-0.02,0);ws.rotation.y=Math.PI/2;ws.rotation.x=0;ws.rotation.z=0;ws.rotateOnAxis(new THREE.Vector3(0,0,1),0);ws.rotation.y=Math.PI/2;ws.rotation.x=-0.62;car.add(ws);
- /* bumpers */
- const bmat=new THREE.MeshStandardMaterial({color:0x232733,roughness:0.7});
- const fb=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.24,1.76),bmat);fb.position.set(L/2+0.04,0.42,0);car.add(fb);
- const rb=fb.clone();rb.position.x=-L/2-0.04;car.add(rb);
- /* mirrors */
- [1,-1].forEach(zs=>{const mr=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.1,0.09),paint);mr.position.set(cfg.cabX+cfg.cabL/2+0.05,0.36+H*0.66,zs*0.92);car.add(mr);
-  car.userData['mirror'+(zs>0?'L':'R')]=mr;});
- /* lights */
- const hl=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.13,0.4),new THREE.MeshStandardMaterial({color:0xfff2c8,emissive:0xffedb0,emissiveIntensity:0.7}));
- [1,-1].forEach(zs=>{const h=hl.clone();h.position.set(L/2+0.05,0.36+H*0.5,zs*0.55);car.add(h);});
- const tl=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.12,0.42),new THREE.MeshStandardMaterial({color:0xd23a3a,emissive:0xb32020,emissiveIntensity:0.6}));
- [1,-1].forEach(zs=>{const t=tl.clone();t.position.set(-L/2-0.05,0.36+H*0.52,zs*0.52);car.add(t);});
- /* wheels */
- const wheels=[];const wx=L*0.34;
- [[wx,0.9],[wx,-0.9],[-wx,0.9],[-wx,-0.9]].forEach(([x,z])=>{const w=makeWheelP();w.position.set(x,0.34,z);car.add(w);wheels.push(w);});
- car.userData.wheels=wheels;
- /* per-panel DIRT overlays: roof, hood, left, right, rear, wheels(front) */
- const zones={};
- function dz(name,mesh){mesh.material=new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,transparent:true,opacity:0,map:null,alphaMap:dirtCanvas(1),depthWrite:false});
-  mesh.material.color.setHex(0x54432c);mesh.material.opacity=dirtLevel;car.add(mesh);zones[name]=mesh.material;return mesh;}
- dz('roof',(()=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(cfg.cabL*0.95,1.5),null);m.position.set(cfg.cabX,cab.position.y+cfg.cabH/2+0.012,0);m.rotation.x=-Math.PI/2;return m;})());
- dz('hood',(()=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(L*0.3,1.58),null);m.position.set(L*0.34,0.36+H*0.76,0);m.rotation.x=-Math.PI/2;return m;})());
- dz('left',(()=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(L*0.94,H*0.6),null);m.position.set(0,0.36+H*0.3,0.875);return m;})());
- dz('right',(()=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(L*0.94,H*0.6),null);m.position.set(0,0.36+H*0.3,-0.875);m.rotation.y=Math.PI;return m;})());
- dz('rear',(()=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(1.7,H*0.62),null);m.position.set(-L/2-0.065,0.36+H*0.36,0);m.rotation.y=-Math.PI/2;return m;})());
- dz('wheels',(()=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(L*0.9,0.34),null);m.position.set(0,0.22,0.885);return m;})());
- car.userData.zones=zones;car.userData.dirt=dirtLevel;
- return car;}
-
-/* ============ hub cars ============ */
-const queueCars=[];
-const heroTypes=['sedan','hatchback','suv','sedan','hatchback'];
-for(let i=0;i<4;i++){const c=makeCarP(heroTypes[(i+1)%3===0?2:(i%3)],PALETTE[i%PALETTE.length],rnd(0.65,0.9));
- c.position.set(LANE.qStart+ -0.5*i*0 + (-(i+1)*5.6)-0,0,0);c.position.x=LANE.qStart-(i)*5.6;scene.add(c);queueCars.push(c);}
-/* parked dusty cars near fence */
-for(let i=0;i<3;i++){const c=makeCarP(['hatchback','suv','sedan'][i],PALETTE[(i+2)%PALETTE.length],rnd(0.7,0.95));
- c.position.set(-24+i*6,0,10.5);c.rotation.y=Math.PI/2;scene.add(c);}
-let hero=null; // active car in flow
-
-/* ============ portal machines ============ */
-/* scan sweep + wireframe + heat patches */
-const scanPlane=new THREE.Mesh(new THREE.PlaneGeometry(2.4,2.2),new THREE.MeshBasicMaterial({color:0x9fd8ff,transparent:true,opacity:0.22,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
-scanPlane.rotation.y=Math.PI/2;scanPlane.visible=false;scene.add(scanPlane);
-const scanBox=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(4.6,2.1,2.1)),new THREE.LineBasicMaterial({color:0x7dd3fc,transparent:true,opacity:0.5}));
-scanBox.visible=false;scene.add(scanBox);
-const heatPatches=[];
-for(let i=0;i<6;i++){const p=new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.5),new THREE.MeshBasicMaterial({color:0xff8a3d,transparent:true,opacity:0,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
- scene.add(p);heatPatches.push(p);}
-/* ion bar */
-const ionBar=new THREE.Mesh(new THREE.BoxGeometry(4.4,0.14,0.14),new THREE.MeshStandardMaterial({color:0x1a2236,emissive:0xA78BFA,emissiveIntensity:0}));
-ionBar.position.set(0,3.6,0);portal.add(ionBar);
-for(let i=0;i<11;i++){const t=new THREE.Mesh(new THREE.ConeGeometry(0.035,0.11,6),new THREE.MeshStandardMaterial({color:0xc4b5fd,emissive:0xA78BFA,emissiveIntensity:0.5}));
- t.position.set(-2+i*0.4,3.5,0);t.rotation.x=Math.PI;portal.add(t);}
-/* mist manifold + cones */
-const mistPipe=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,4.4,10),steel());mistPipe.rotation.x=Math.PI/2;mistPipe.rotation.z=Math.PI/2;mistPipe.position.set(0,3.95,0);portal.add(mistPipe);
-const mistCones=new THREE.Group();
-for(let i=0;i<7;i++){const c=new THREE.Mesh(new THREE.ConeGeometry(0.42,1.9,10,1,true),new THREE.MeshBasicMaterial({color:0x8ed3fb,transparent:true,opacity:0,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
- c.position.set(-1.8+i*0.6,2.95,0);c.rotation.x=Math.PI;mistCones.add(c);}
-scene.add(mistCones);
-/* THE HERO — segmented textile arrays */
-const texMat=new THREE.MeshStandardMaterial({color:0xFF8A3D,roughness:0.92,emissive:0x76340c,emissiveIntensity:0.25});
-const texFrameMat=darkMatte();
-const roofArray=new THREE.Group();
-(function(){const frame=new THREE.Mesh(new THREE.BoxGeometry(4.0,0.16,2.0),texFrameMat);roofArray.add(frame);
- const piston=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,2.4,10),steel());piston.position.y=1.3;roofArray.add(piston);
- roofArray.userData.pads=[];
- for(let ix=0;ix<6;ix++)for(let iz=0;iz<3;iz++){
-  const pad=new THREE.Mesh(new THREE.BoxGeometry(0.58,0.1,0.58),texMat);
-  pad.position.set(-1.7+ix*0.66,-0.16,-0.62+iz*0.62);
-  const spring=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.14,6),steel());spring.position.set(pad.position.x,-0.06,pad.position.z);
-  roofArray.add(spring);roofArray.add(pad);roofArray.userData.pads.push(pad);}
-})();
-roofArray.position.set(0,5.1,0);roofArray.visible=false;scene.add(roofArray);
-const sideArrays=[];
-[1,-1].forEach(zs=>{const g=new THREE.Group();
- const frame=new THREE.Mesh(new THREE.BoxGeometry(3.8,1.5,0.14),texFrameMat);frame.position.y=1.05;g.add(frame);
- const rod=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.09,1.2),steel());rod.position.set(0,1.05,zs*0.65);g.add(rod);
- g.userData.pads=[];
- for(let ix=0;ix<6;ix++)for(let iy=0;iy<2;iy++){
-  const pad=new THREE.Mesh(new THREE.BoxGeometry(0.56,0.62,0.1),texMat);
-  pad.position.set(-1.6+ix*0.64,0.72+iy*0.68,zs*-0.12);g.add(pad);g.userData.pads.push(pad);}
- g.position.set(0,0,zs*3.0);g.visible=false;scene.add(g);sideArrays.push({g,zs});});
-/* air-knife units + sheets */
-const airUnits=[];
-[1,-1].forEach(zs=>{const u=new THREE.Group();
- const body=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.26,1.5),steel());u.add(body);
- const sheet=new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.6),new THREE.MeshBasicMaterial({color:0xfde68a,transparent:true,opacity:0,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
- sheet.position.y=-0.95;sheet.rotation.x=0.25;u.add(sheet);
- u.position.set(zs*1.0,3.15,zs*2.15);u.rotation.z=zs*0.5;u.visible=false;scene.add(u);airUnits.push({u,zs,sheet});});
-/* gloss ring */
-const glossRing=new THREE.Mesh(new THREE.TorusGeometry(1.75,0.05,8,36),new THREE.MeshBasicMaterial({color:0xF472B6,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
-glossRing.rotation.y=Math.PI/2;glossRing.visible=false;scene.add(glossRing);
-
-/* ============ particles ============ */
-function mkPts(n,color,size){const g=new THREE.BufferGeometry();const p=new Float32Array(n*3);
- g.setAttribute('position',new THREE.BufferAttribute(p,3));
- const pts=new THREE.Points(g,new THREE.PointsMaterial({color,size,transparent:true,opacity:0.9,depthWrite:false,blending:THREE.AdditiveBlending}));
- scene.add(pts);return{pts,p,g,n};}
-const P_ion=mkPts(110,0xc4b5fd,0.075),P_mist=mkPts(190,0x8ed3fb,0.06),P_air=mkPts(150,0xfde68a,0.07),P_spark=mkPts(60,0xffffff,0.09);
-[P_ion,P_mist,P_air,P_spark].forEach(p=>p.pts.visible=false);
-const SEED=[];for(let i=0;i<220;i++)SEED.push({a:Math.random(),b:Math.random(),c:Math.random(),d:Math.random()});
-function drawPts(P,vis,fn,op){P.pts.visible=vis>0.02;if(vis<=0.02)return;
- for(let i=0;i<P.n;i++){const s=SEED[i%SEED.length];const v=fn(i,s);P.p[i*3]=v[0];P.p[i*3+1]=v[1];P.p[i*3+2]=v[2];}
- P.g.attributes.position.needsUpdate=true;P.pts.material.opacity=clamp(op,0,1);}
-
-/* ============ flow state machine ============ */
-/* states: idle | queueAdv | entry | precycle | inportal | exit | qc | done */
-let flow='idle', flowT=0, cycleT=0, preT=0, simSpeed=1, heavyNext=false, heavyCar=false;
-let carsToday=0, waterToday=0, T=0, lastMs=performance.now();
-const cqsHist=[];
-const PRE_VISUAL=6; /* 60s pre-cycle shown accelerated 10× */
-function nextHero(){
- if(queueCars.length===0){ // regenerate queue
-  for(let i=0;i<3;i++){const c=makeCarP(heroTypes[i%3],PALETTE[(carsToday+i)%PALETTE.length],rnd(0.65,0.9));
-   c.position.set(LANE.qStart-(i+1)*5.6,0,0);scene.add(c);queueCars.push(c);}}
- hero=queueCars.shift();heavyCar=heavyNext;heavyNext=false;$('heavyBtn').classList.remove('on');
- if(heavyCar){Object.values(hero.userData.zones).forEach(m=>m.opacity=0.97);hero.userData.dirt=0.97;}
-}
-function startFlow(){if(flow!=='idle')return;nextHero();flow='queueAdv';flowT=0;}
-$('runBtn').onclick=()=>{if(flow==='idle')startFlow();};
-$('heavyBtn').onclick=()=>{heavyNext=!heavyNext;$('heavyBtn').classList.toggle('on',heavyNext);};
-
-/* zone clear schedule inside textile window 6–16 (staggered per panel) */
-const ZONE_CLEAR={roof:[6,10],hood:[7.5,11.5],left:[8.5,13.5],right:[8.5,13.5],rear:[10.5,15],wheels:[11,16]};
-
-function setNarr(no,noBg,nm,ds,edge){$('nNo').textContent=no;$('nNo').style.background=noBg;$('nNm').textContent=nm;$('nDs').textContent=ds;$('narr').style.borderLeftColor=edge||noBg;}
-
-/* QC panel zones */
-const QZONES=['ROOF','HOOD','LEFT','RIGHT','REAR','WHEELS'];
-const qzWrap=$('qzWrap');
-QZONES.forEach((z,i)=>{const d=document.createElement('div');d.className='qz';
- d.innerHTML=`<span>${z}</span><div class="zb"><div class="zf" id="zf${i}"></div></div><span class="zv" id="zv${i}">—</span>`;qzWrap.appendChild(d);});
-let qcT=0,qcScores=[];
-function qcBegin(){$('qcPanel').style.display='block';qcT=0;
- qcScores=QZONES.map(()=>98+Math.random()*2);
- $('passBadge').style.display='none';$('gAfter').textContent='— GU';
- $('gBefore').textContent=(55+Math.floor(Math.random()*10))+' GU';}
-function qcUpdate(dt){qcT+=dt;
- QZONES.forEach((z,i)=>{const u=ease(seg(qcT,0.2+i*0.25,1.4+i*0.25));const v=u*qcScores[i];
-  $('zf'+i).style.width=(v)+'%';$('zv'+i).textContent=v>1?v.toFixed(0):'—';});
- const cu=ease(seg(qcT,0.5,2.4));$('cqsBig').textContent=Math.round(cu*102);
- if(qcT>2.0){$('gAfter').textContent=(88+Math.floor((qcT*7)%6))+' GU';}
- if(qcT>2.6)$('passBadge').style.display='flex';
- /* beading mini-anim */
- const bc=$('beadCanvas'),bx=bc.getContext('2d');bx.clearRect(0,0,bc.width,bc.height);
- bx.fillStyle='#12203c';bx.fillRect(0,24,bc.width,10);
- for(let i=0;i<9;i++){const x=(i*30+qcT*46)%bc.width;const r=4+Math.sin(qcT*3+i)*1.4;
-  bx.beginPath();bx.arc(x,20-Math.abs(Math.sin(qcT*2+i))*7,r,0,7);bx.fillStyle='rgba(141,211,251,0.85)';bx.fill();}
-}
-
-/* CQS chart */
-function drawChart(){const c=$('cqsChart'),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);
- const bins=[0,0,0,0,0];cqsHist.forEach(v=>{const b=clamp(Math.floor((v-96)/1.6),0,4);bins[b]++;});
- const mx=Math.max(1,...bins);
- bins.forEach((b,i)=>{const h=(b/mx)*40;x.fillStyle='#2DD4BF';x.globalAlpha=0.35+0.65*(i/4);
-  x.fillRect(10+i*48,48-h,36,h);});
- x.globalAlpha=1;x.fillStyle='#8296bd';x.font='8px monospace';
- ['96','97.6','99.2','101','102+'].forEach((l,i)=>x.fillText(l,14+i*48,54));}
-drawChart();
-
-/* payback slider */
-function pay(){const cpd=+$('cpd').value;$('cpdV').textContent=cpd+' cars/day';
- const months=1850000/(135*cpd*30);$('payV').textContent=clamp(months,8,15).toFixed(1)+' months';}
-$('cpd').oninput=pay;pay();
-$('dashHead').onclick=()=>{const b=$('dashBody');const open=b.style.display!=='none';b.style.display=open?'none':'block';$('dashArrow').textContent=open?'▸':'▾';};
-
-/* ============ cameras ============ */
-let camMode='follow';
-function setCam(m){camMode=m;document.querySelectorAll('.cam').forEach(b=>b.classList.toggle('on',b.dataset.cam===m));}
-document.querySelectorAll('.cam').forEach(b=>b.onclick=()=>setCam(b.dataset.cam));
-document.querySelectorAll('.spd').forEach(b=>b.onclick=()=>{simSpeed=+b.dataset.s;document.querySelectorAll('.spd').forEach(x=>x.classList.toggle('on',x===b));});
-$('presBtn').onclick=()=>{document.body.classList.add('presenter');if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});presLoop=true;if(flow==='idle')startFlow();};
-$('exitPres').onclick=()=>{document.body.classList.remove('presenter');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});presLoop=false;};
-let presLoop=false;
-
-/* ============ main update ============ */
-function update(dt){
- T+=dt;
- const tc=flow==='inportal'?cycleT:0;
- /* belt strips move only as transport (car entering/exiting) */
- const beltOn=(flow==='queueAdv'||flow==='entry'||flow==='exit'||flow==='qc');
- if(beltOn)beltStrips.forEach(s=>{s.position.x+=dt*2.4;if(s.position.x>26)s.position.x=-30;});
-
- /* ---- flow ---- */
- if(flow==='queueAdv'){flowT+=dt;
-  const u=ease(seg(flowT,0,2.2));
-  hero.position.x=lerp(hero.position.x,LANE.qStart+4,0.06);
-  queueCars.forEach((c,i)=>{c.position.x=lerp(c.position.x,LANE.qStart-(i)*5.6,0.04);});
-  if(flowT>1.6){flow=heavyCar?'precycle':'entry';flowT=0;
-   if(heavyCar)setNarr('TRIAGE','#FBBF24','Heavy soil detected → 60s pre-cycle',
-    'The scan routed this monsoon-grade car to the pre-cycle pad. Standard cars go straight to the 24s program — the promise never breaks. (Shown accelerated 10×.)','#FBBF24');}
- }
- else if(flow==='precycle'){flowT+=dt;preT=flowT;
-  /* car moves onto side pad, gets pre-soak, returns */
-  if(flowT<1.6){hero.position.x=lerp(hero.position.x,-12,0.08);hero.position.z=lerp(hero.position.z,6.5,0.08);}
-  else if(flowT<PRE_VISUAL-1.2){drawPts(P_mist,1,(i,s)=>[-12+lerp(-2,2,s.c),2.4-((T*(1+s.a)+s.b)%1)*1.8,6.5+lerp(-1,1,s.d)],0.8);
-   Object.values(hero.userData.zones).forEach(m=>m.opacity=Math.max(0.6,m.opacity-dt*0.06));}
-  else{hero.position.z=lerp(hero.position.z,0,0.08);hero.position.x=lerp(hero.position.x,-9,0.08);
-   if(Math.abs(hero.position.z)<0.05){flow='entry';flowT=0;P_mist.pts.visible=false;}}
- }
- else if(flow==='entry'){flowT+=dt;
-  hero.position.x=lerp(hero.position.x,LANE.portal,0.055);
-  hero.userData.wheels.forEach(w=>{w.userData.sp.rotation.z-=dt*4;});
-  if(Math.abs(hero.position.x-LANE.portal)<0.08){flow='inportal';cycleT=0;}
-  setNarr('ENTRY','#2DD4BF','Conveyor: transport, not processing','The car rides the conveyor into the portal. All processing happens inside — six modules, one 24-second overlapped cycle.','#2DD4BF');
- }
- else if(flow==='inportal'){cycleT+=dt;
-  if(cycleT>=CYCLE){flow='exit';flowT=0;carsToday++;waterToday+=118;cqsHist.push(100+rnd(0,2.4));drawChart();
-   $('dCars').textContent=carsToday;$('dWater').textContent=Math.round(waterToday)+' L';}
- }
- else if(flow==='exit'){flowT+=dt;
-  hero.position.x=lerp(hero.position.x,LANE.qc,0.05);
-  hero.userData.wheels.forEach(w=>{w.userData.sp.rotation.z-=dt*4;});
-  if(Math.abs(hero.position.x-LANE.qc)<0.1){flow='qc';flowT=0;qcBegin();
-   setNarr('QC','#22C55E','Quality check — closing the loop','An inspection arch scores every zone against the Cars24 Standard. Any zone under target is re-run — the quality loop is closed, not assumed.','#22C55E');}
- }
- else if(flow==='qc'){flowT+=dt;qcUpdate(dt);
-  qcBeam.material.opacity=0.25+0.15*Math.sin(T*6);
-  if(flowT>4){flow='done';flowT=0;}
- }
- else if(flow==='done'){flowT+=dt;
-  hero.position.x=lerp(hero.position.x,LANE.done,0.04);
-  qcBeam.material.opacity=Math.max(0,qcBeam.material.opacity-dt);
-  if(flowT>2.4){$('qcPanel').style.display='none';
-   setNarr('DONE','#22C55E','Photo-ready · ~90s door-to-door','Clean, glossy, protected — off to the 360° photo bay. At 40 cars/hour, one portal clears a full MRL day before lunch.','#22C55E');
-   if(hero.position.x>LANE.done-1){scene.remove(hero);flow='idle';
-    if(presLoop)startFlow();}}
- }
-
- /* ---- portal cycle FX (only in-portal, overlapped) ---- */
- const inP=flow==='inportal';
- if(!inP){ /* hard-hide all portal FX outside the cycle */
-  scanPlane.visible=false;scanBox.visible=false;glossRing.visible=false;
-  roofArray.visible=false;sideArrays.forEach(sa=>sa.g.visible=false);
-  airUnits.forEach(a=>a.u.visible=false);mistCones.visible=false;
-  ionBar.material.emissiveIntensity=0;
-  if(flow!=='precycle'){[P_ion,P_mist,P_air,P_spark].forEach(p=>p.pts.visible=false);}
- }
- portalLight.intensity=inP?0.9+0.4*Math.sin(T*4):0;
- ledStates.forEach((m,i)=>{const on=inP&&((Math.floor(T*3)+i)%3===0);m.material.emissive.setHex(on?0x2DD4BF:0x000000);});
- if(hero&&inP){
-  const cx=hero.position.x;
-  /* 1 scan 0-2 */
-  const sOn=tc<2.2;
-  scanPlane.visible=sOn;scanBox.visible=sOn;
-  if(sOn){scanPlane.position.set(cx-2.2+seg(tc,0,2)*4.4,1.25,0);scanBox.position.set(cx,1.15,0);
-   heatPatches.forEach((p,i)=>{const zn=[[0,2.05,0,-Math.PI/2],[1.4,1.35,0,-Math.PI/2],[0,0.8,0.9,0],[0,0.8,-0.9,Math.PI],[-2.1,0.85,0,-Math.PI/2]][i%5];
-    p.position.set(cx+zn[0],zn[1],zn[2]);p.rotation.set(i<2||i===4?-Math.PI/2:0,zn[3]===Math.PI?Math.PI:(zn[3]===-Math.PI/2&&i>=2?zn[3]:0),0);
-    if(i<2||i===4)p.rotation.set(-Math.PI/2,0,0);else p.rotation.set(0,zn[3],0);
-    p.material.opacity=seg(tc,0.6+i*0.15,1.4+i*0.15)*0.4;});}
-  else heatPatches.forEach(p=>p.material.opacity=Math.max(0,p.material.opacity-dt));
-  /* 2 ion 2-5 */
-  const ionI=tri(tc,2,5.2);ionBar.material.emissiveIntensity=ionI*1.4;
-  drawPts(P_ion,ionI,(i,s)=>[cx+lerp(-2.1,2.1,s.c),0.8+((T*(0.5+s.a)+s.b)%1)*1.9,lerp(-1,1,s.d)],ionI);
-  /* 3 mist 4-8 */
-  const mistI=tri(tc,4,8.3);
-  mistCones.children.forEach(c=>{c.material.opacity=mistI*0.3;});
-  mistCones.position.x=cx;mistCones.visible=mistI>0.02;
-  drawPts(P_mist,mistI,(i,s)=>[cx+lerp(-2,2,s.c),3.8-((T*(1.1+s.a)+s.b)%1)*2.6,lerp(-1,1,s.d)],mistI);
-  /* wet darkening while misted */
-  if(hero.userData.paint){const wet=tri(tc,4,10)*0.25;
-   hero.userData.paint.roughness=clamp(0.32-wet+ (1-cleanNow())*0.3,0.05,0.7);}
-  /* 4 textile 6-16 THE HERO */
-  const texOn=tc>=6&&tc<=16.4;const tIn=ease(seg(tc,6,7.2)),tOut=ease(seg(tc,15.2,16.4));
-  roofArray.visible=texOn;
-  if(texOn){
-   roofArray.position.x=cx+Math.sin(T*2.2)*0.55; /* slow sweep along length */
-   roofArray.position.y=lerp(5.1,2.35,tIn)+tOut*2.6+Math.sin(T*9)*0.03;
-   roofArray.userData.pads.forEach((p,i)=>{p.position.y=-0.16+Math.sin(T*10+i*1.3)*0.03; /* spring compliance shimmer */
-    /* retract pads over mirror line */
-    const worldX=roofArray.position.x+p.position.x;
-    const nearMirror=Math.abs(worldX-(cx+0.9))<0.35;
-    p.scale.y=nearMirror?0.4:1;});
-   sideArrays.forEach(sa=>{sa.g.visible=true;sa.g.position.x=cx+Math.sin(T*2.2+1)*0.4;
-    sa.g.position.z=lerp(sa.zs*3.0,sa.zs*1.12,tIn)+tOut*sa.zs*1.9;
-    sa.g.userData.pads.forEach((p,i)=>{p.position.z=sa.zs*-0.12+Math.sin(T*11+i)*0.02*sa.zs;});});
-  } else sideArrays.forEach(sa=>sa.g.visible=false);
- }
- if(hero){
-  const zs=hero.userData.zones;
-  if(flow==='inportal'){
-   Object.entries(ZONE_CLEAR).forEach(([z,w])=>{const u=ease(seg(tc,w[0],w[1]));
-    if(zs[z])zs[z].opacity=Math.min(zs[z].opacity,(1-u)*hero.userData.dirt);});
-   /* 5 air 12-20 */
-   const airI=tri(tc,12,20.3);
-   airUnits.forEach(a=>{a.u.visible=airI>0.02;a.u.position.x=hero.position.x+a.zs*1.0;
-    a.sheet.material.opacity=airI*(0.3+0.2*Math.abs(Math.sin(T*11)));});
-   drawPts(P_air,airI,(i,s)=>{const f=((T*(1.4+s.a)+s.b)%1);const side=s.c<0.5?-1:1;
-    return[hero.position.x+lerp(-1.6,1.6,s.d),lerp(1.9,0.6,f),side*(1.0+f*2.0)];},airI);
-   /* 6 gloss 21-24 */
-   const gI=seg(tc,21,24);
-   glossRing.visible=tc>=21&&tc<=24;
-   if(glossRing.visible){glossRing.position.set(hero.position.x-2.1+gI*4.2,1.2,0);glossRing.material.opacity=0.5*tri(tc,21,24)+0.2;}
-   drawPts(P_spark,tc>22?1:0,(i,s)=>[hero.position.x+lerp(-2,2,s.a),lerp(0.6,1.9,s.b),lerp(-1,1,s.c)],tc>22?0.5+0.5*Math.abs(Math.sin(T*8)):0);
-   if(hero.userData.paint){hero.userData.paint.clearcoat=lerp(0.8,1.0,gI);hero.userData.paint.clearcoatRoughness=lerp(0.25,0.04,cleanNow());
-    hero.userData.paint.envMapIntensity=lerp(1.1,1.7,gI);}
-  }
- }
- function cleanNow(){if(!hero)return 0;const vals=Object.values(hero.userData.zones).map(m=>m.opacity);
-  const avg=vals.reduce((a,b)=>a+b,0)/vals.length;return 1-avg/Math.max(0.0001,hero.userData.dirt);}
-
- /* ---- HUD ---- */
- const showT=inP?cycleT:(flow==='precycle'?preT*10:0);
- $('bt').textContent=inP?cycleT.toFixed(1):(flow==='precycle'?('PRE '+Math.min(60,preT*10).toFixed(0)+'s'):'0.0');
- const phase=inP?(MODS.filter(m=>tc>=m.s&&tc<=m.e).map(m=>m.nm.split(' ')[0]).join(' + ')||'CYCLE'):flow.toUpperCase();
- $('btPh').textContent=phase;
- /* gantt */
- let active=null;
- MODS.forEach(m=>{const on=inP&&tc>=m.s&&tc<=m.e;if(on)active=m;
-  $('gl_'+m.k).classList.toggle('on',on);$('gs_'+m.k).classList.toggle('on',on);
-  $('gf_'+m.k).style.width=inP?(seg(tc,m.s,m.e)*(m.e-m.s)/CYCLE*100)+'%':'0%';});
- const gph=$('gph');
- if(inP){gph.style.opacity=1;gph.style.left=`calc(136px + ${tc/CYCLE}*(100% - 152px))`;}else gph.style.opacity=0;
- $('gpct').textContent=inP?Math.round(tc/CYCLE*100)+'%':'—';
- if(inP&&active){const idx=MODS.indexOf(active)+1;
-  setNarr('MODULE '+idx+'/6',active.col,active.nm,active.ds,active.col);}
-
- /* ---- camera ---- */
- let wantP=null,wantG=null;
- if(camMode==='follow'&&hero){wantP=new THREE.Vector3(hero.position.x+7.5,4.6,9.5);wantG=new THREE.Vector3(hero.position.x,1.1,0);}
- else if(camMode==='portal'){wantP=new THREE.Vector3(6.5,3.6,8.2);wantG=new THREE.Vector3(0,1.5,0);}
- else if(camMode==='qc'){wantP=new THREE.Vector3(LANE.qc+6,3.4,7.5);wantG=new THREE.Vector3(LANE.qc,1.3,0);}
- else if(camMode==='top'){wantP=new THREE.Vector3(0,34,0.01);wantG=new THREE.Vector3(0,0,0);}
- if(wantP){camera.position.lerp(wantP,0.045);orbit.target.lerp(wantG,0.06);camera.lookAt(orbit.target);}
- else{/* free orbit */
-  const x=orbit.target.x+orbit.r*Math.sin(orbit.phi)*Math.cos(orbit.theta);
-  const y=orbit.target.y+orbit.r*Math.cos(orbit.phi);
-  const z=orbit.target.z+orbit.r*Math.sin(orbit.phi)*Math.sin(orbit.theta);
-  camera.position.lerp(new THREE.Vector3(x,y,z),0.12);camera.lookAt(orbit.target);}
-}
-
-/* ============ resize + loop ============ */
-function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;
- if(canvas.width!==w||canvas.height!==h){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}}
-function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-lastMs)/1000)*simSpeed;lastMs=now;
- resize();update(dt);renderer.render(scene,camera);}
-requestAnimationFrame(loop);
-
-/* ============ tabs ============ */
-$('tabSim').onclick=()=>{$('tabSim').classList.add('on');$('tabScan').classList.remove('on');$('scanTab').style.display='none';};
-$('tabScan').onclick=()=>{$('tabScan').classList.add('on');$('tabSim').classList.remove('on');$('scanTab').style.display='block';buildGrid();};
-
-/* ============ scan demo ============ */
-const gridOv=$('gridOv');let gridCells=[];
-function buildGrid(){if(gridCells.length)return;for(let i=0;i<24;i++){const d=document.createElement('div');d.className='cell';
- d.innerHTML='<span>—</span>';gridOv.appendChild(d);gridCells.push(d);}}
-$('camStart').onclick=async()=>{try{
- const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
- $('vid').srcObject=st;$('vid').style.display='block';$('scanImg').style.display='none';
- $('verdict').textContent='Webcam live — press Analyze frame.';
-}catch(e){$('verdict').textContent='Webcam unavailable — use Upload photo instead.';}};
-$('upBtn').onclick=()=>$('upFile').click();
-$('upFile').onchange=e=>{const f=e.target.files[0];if(!f)return;
- $('scanImg').src=URL.createObjectURL(f);$('scanImg').style.display='block';$('vid').style.display='none';
- $('verdict').textContent='Photo loaded — press Analyze frame.';};
-$('analyzeBtn').onclick=()=>{
- const c=document.createElement('canvas');c.width=360;c.height=240;const x=c.getContext('2d');
- const src=$('scanImg').style.display!=='none'?$('scanImg'):$('vid');
- try{x.drawImage(src,0,0,360,240);}catch(e){$('verdict').textContent='No frame available yet.';return;}
- const img=x.getImageData(0,0,360,240).data;
- /* global mean luminance */
- let gsum=0;for(let i=0;i<img.length;i+=4)gsum+=0.299*img[i]+0.587*img[i+1]+0.114*img[i+2];
- const gmean=gsum/(img.length/4);
- let heavy=0;
- for(let cy=0;cy<4;cy++)for(let cxi=0;cxi<6;cxi++){
-  let sum=0,sq=0,n=0;
-  for(let y=cy*60;y<(cy+1)*60;y+=2)for(let xx=cxi*60;xx<(cxi+1)*60;xx+=2){
-   const o=(y*360+xx)*4;const l=0.299*img[o]+0.587*img[o+1]+0.114*img[o+2];sum+=l;sq+=l*l;n++;}
-  const mean=sum/n,dev=Math.sqrt(Math.max(0,sq/n-mean*mean)),drop=gmean-mean;
-  let cls='CLEAN';
-  if(drop>52||(drop>34&&dev>34))cls='BONDED';
-  else if(drop>30||dev>30)cls='GRIME';
-  else if(drop>13||dev>18)cls='DUST';
-  if(cls==='GRIME'||cls==='BONDED')heavy++;
-  const cell=gridCells[cy*6+cxi];cell.className='cell '+cls;cell.querySelector('span').textContent=cls;}
- $('verdict').textContent=heavy>=5
-  ?'HEAVY SOIL → 60s PRE-CYCLE + 24s PROGRAM'
-  :'STANDARD LOAD → 24s PROGRAM';
- $('verdict').style.borderLeftColor=heavy>=5?'#FBBF24':'#2DD4BF';};
-} /* end APP */
-</script>
+  <!-- Libraries: local copies first so the demo never depends on venue Wi-Fi -->
+  <script src="js/vendor/three.min.js"></script>
+  <script src="js/vendor/gsap.min.js"></script>
+  <script>
+    if (!window.THREE) document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    if (!window.gsap)  document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"><\/script>');
+  </script>
+  <script src="js/fx.js"></script>
+  <script src="js/sim.js"></script>
+  <script src="js/enhance.js"></script>
+  <script src="js/patch.js"></script>
 </body>
+
 </html>

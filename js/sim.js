@@ -61,6 +61,7 @@ function APP() {
   ];
   const CYCLE = 22.6;
   const LANE = { qStart: -32, portalIn: -11.5, portalOut: 18.0, qc: 18.8, finish: 25.5, done: 31 };
+  const BELT = (18.0 - (-11.5)) / 22.6; /* conveyor speed, units/s — one constant end-to-end (no wheel slip) */
   const ZONE_CLEAR = { roof: [5.6, 9.4], hood: [7.0, 10.8], front: [6.1, 9.9], left: [8.0, 12.7], right: [8.0, 12.7], rear: [9.9, 14.1], wheels: [10.4, 15.1] };
   const QZONES = ['ROOF', 'HOOD', 'LEFT', 'RIGHT', 'REAR', 'WHEELS'];
   const VEHICLES = {
@@ -2268,7 +2269,7 @@ function APP() {
     $('narr').style.opacity = introOn ? '0' : '1';
 
     const beltOn = convRun && !paused && !estop && (flow === 'queueAdv' || flow === 'entry' || flow === 'exit' || flow === 'qc' || flow === 'inportal' || conveyorForced);
-    if (beltOn) beltStrips.forEach(s => { s.position.x += dt * 2.4 * convSpd * convDir; if (s.position.x > 32) s.position.x = -34; if (s.position.x < -34) s.position.x = 32; });
+    if (beltOn) beltStrips.forEach(s => { s.position.x += dt * BELT * convSpd * convDir; if (s.position.x > 32) s.position.x = -34; if (s.position.x < -34) s.position.x = 32; });
     [-9.0, -4.0, 1.0, 6.0, 11.0, 16.0].forEach((sx, idx) => {
       if (proxSensors[idx] && hero) {
         const near = Math.abs(hero.position.x - sx) < 2.5;
@@ -2303,11 +2304,11 @@ function APP() {
         }
       } else if (flow === 'entry') {
         flowT += dt;
-        hero.position.x += dt * 2.8 * convSpd;
+        hero.position.x += dt * BELT * convSpd;
         curtains.forEach(c => c.material.opacity = 0.35);
         fireLogOnce('entry', 'Vehicle at portal threshold', 'info');
         setNarr('ENTRY', '#2EE59D', 'Conveyor: transport, not process', 'The car rides the conveyor into the portal. All processing happens inside — six modules, one 22.6-second overlapped cycle.', '#2EE59D');
-        if (hero.position.x >= LANE.portalIn) { flow = 'inportal'; cycleT = 0; wantSnap = 'before'; qcTargets = QZONES.map(() => 97 + Math.random() * 2.8); QZONES.forEach((_, i) => { if ($('zf' + i)) { $('zf' + i).style.width = '0'; $('zv' + i).textContent = '—'; } }); log('Scan initiated', 'ok'); }
+        if (hero.position.x >= LANE.portalIn) { flow = 'inportal'; cycleT = 0; wantSnap = 'before'; qcTargets = [99.4, 99.0, 99.2, 99.1, 98.6, 98.3]; QZONES.forEach((_, i) => { if ($('zf' + i)) { $('zf' + i).style.width = '0'; $('zv' + i).textContent = '—'; } }); log('Scan initiated', 'ok'); }
       } else if (flow === 'inportal') {
         if (soloMod) {
           soloTimer += dt;
@@ -2378,14 +2379,14 @@ function APP() {
             if ($('tCov')) $('tCov').textContent = '98.5%';
             lastReport = {
               zones: qcTargets.slice(),
-              cqs: Math.round(100 + rnd(0, 2.4)),
-              gloss: 88 + Math.floor(Math.random() * 6),
+              cqs: 101,
+              gloss: 94,
               cov: '98.5%'
             };
             $('dCov').textContent = lastReport.cov;
             $('dCont').textContent = '84% → 2%';
             $('dGloss').textContent = lastReport.gloss + ' GU';
-            $('dProt').textContent = (92 + Math.random() * 6).toFixed(0) + '%';
+            $('dProt').textContent = '98.5%';
             log('Cycle complete · 22.60 s', 'ok');
             if (presOn) {
               setTimeout(() => showQuote('The bottleneck was not speed. It was sequence.', 3200), 3600);
@@ -2395,7 +2396,7 @@ function APP() {
         }
       } else if (flow === 'exit') {
         flowT += dt;
-        hero.position.x += dt * 3.2 * convSpd;
+        hero.position.x += dt * BELT * convSpd;
         // As car glides past qcArch at 18.8:
         if (hero.position.x >= 18.0 && hero.position.x <= 19.8) {
           qcBeam.material.opacity = 0.35 + 0.15 * Math.sin(T * 8);
@@ -2432,7 +2433,7 @@ function APP() {
     if (hero) {
       const dx = hero.position.x - (hero.userData.lastX || hero.position.x);
       hero.userData.lastX = hero.position.x;
-      const rot = dx / 0.34;
+      const rot = dx / 0.47; /* true tyre outer radius: roll without slip */
       hero.userData.wheels.forEach(w => {
         w.rotation.z -= rot;
         if (w.userData.sp) w.userData.sp.rotation.z -= rot;

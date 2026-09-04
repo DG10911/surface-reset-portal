@@ -40,3 +40,14 @@
   var off = document.getElementById('offline');
   if (off && window.THREE) off.style.display = 'none';
 })();
+
+/* a11y: reflect .on state onto aria-pressed for segmented + toggle controls */
+(function () {
+  function sync() {
+    document.querySelectorAll('.seg button, .toggle').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.classList.contains('on') ? 'true' : 'false');
+    });
+  }
+  document.addEventListener('click', function () { requestAnimationFrame(sync); }, true);
+  requestAnimationFrame(sync);
+})();

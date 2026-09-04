@@ -56,7 +56,7 @@ function APP() {
     },
     {
       k: 'gloss', s: 19.5, e: 22.6, nm: 'Gloss + protect', short: 'Gloss', col: '#EC4899',
-      ds: 'Ultra-thin SiO₂ hydrophobic layer. Gloss, uniformity, hydrophobicity are simulation estimates.'
+      ds: 'SiO₂-based spray sealant, air-knife leveled; full cure off-line. Gloss/hydrophobicity are simulation estimates.'
     }
   ];
   const CYCLE = 22.6;

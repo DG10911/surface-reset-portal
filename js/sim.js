@@ -82,6 +82,7 @@ function APP() {
   let introT = 0, introOn = true;
   let presOn = false, quoteOn = false;
   let qcT = 0, qcScores = [];
+  let qcTargets = QZONES.map(() => 0);
   let lastReport = null;
   let cineOn = false, cineTl = null, wakeT = -1;
   let snapBefore = null, snapAfter = null, wantSnap = null;
@@ -2297,7 +2298,7 @@ function APP() {
         curtains.forEach(c => c.material.opacity = 0.35);
         fireLogOnce('entry', 'Vehicle at portal threshold', 'info');
         setNarr('ENTRY', '#2EE59D', 'Conveyor: transport, not process', 'The car rides the conveyor into the portal. All processing happens inside — six modules, one 22.6-second overlapped cycle.', '#2EE59D');
-        if (hero.position.x >= LANE.portalIn) { flow = 'inportal'; cycleT = 0; wantSnap = 'before'; log('Scan initiated', 'ok'); }
+        if (hero.position.x >= LANE.portalIn) { flow = 'inportal'; cycleT = 0; wantSnap = 'before'; qcTargets = QZONES.map(() => 97 + Math.random() * 2.8); QZONES.forEach((_, i) => { if ($('zf' + i)) { $('zf' + i).style.width = '0'; $('zv' + i).textContent = '—'; } }); log('Scan initiated', 'ok'); }
       } else if (flow === 'inportal') {
         if (soloMod) {
           soloTimer += dt;
@@ -2329,15 +2330,26 @@ function APP() {
           }
         } else {
           cycleT += dt;
-          /* crawl through portal */
-          const u = clamp(cycleT / CYCLE, 0, 1);
-          hero.position.x = lerp(LANE.portalIn, LANE.portalOut, u);
+          /* station-dwell: car quick-slides to the active station, holds while it fires, then moves on */
+          let cur = MODS[0];
+          for (let mi = 0; mi < MODS.length; mi++) if (cycleT >= MODS[mi].s) cur = MODS[mi];
+          const targetX = (STATIONS[cur.k] || { x: LANE.portalOut }).x;
+          hero.position.x = damp(hero.position.x, targetX, 3.6, dt);
+          hero.position.z = 0;
           MODS.forEach(m => {
             if (cycleT >= m.s && cycleT < m.s + dt + 0.02) {
               fireLogOnce('m' + m.k, m.nm + ' activated', 'ok');
               fireSfx(m.k);
             }
           });
+          /* live QC fill — each panel score rises as the cleaning field reaches it (staggered) */
+          QZONES.forEach((z, i) => {
+            const uu = clamp((cycleT - (3.2 + i * 2.1)) / 4.5, 0, 1);
+            const zf = $('zf' + i), zv = $('zv' + i);
+            if (zf) { zf.style.width = (uu * 100) + '%'; zv.textContent = uu > 0.03 ? Math.round(uu * qcTargets[i]) : '—'; }
+          });
+          const tcq = $('tCqs'); if (tcq) tcq.textContent = cycleT > 4 ? Math.round(clamp((cycleT - 4) / 15, 0, 1) * 100) : '—';
+          const tcv = $('tCov'); if (tcv) tcv.textContent = Math.round(clamp(cycleT / CYCLE, 0, 1) * 98.5) + '%';
           if (cycleT >= CYCLE) {
             flow = 'exit'; flowT = 0; carsToday++; if (hubStore[currentHub]) hubStore[currentHub].cars = carsToday; waterToday += 118;
             fireSfx('complete');
@@ -2353,11 +2365,15 @@ function APP() {
               var sh = $('opsShift'); if (sh) sh.textContent = (parseInt(sh.textContent) || 127) + 1;
               var pr = $('opsProc'); if (pr) pr.textContent = carsToday;
             })();
+            /* lock QC bars to their final panel scores */
+            QZONES.forEach((z, i) => { if ($('zf' + i)) { $('zf' + i).style.width = qcTargets[i] + '%'; $('zv' + i).textContent = Math.round(qcTargets[i]); } });
+            if ($('tCqs')) $('tCqs').textContent = Math.round(100 + rnd(0, 2.4));
+            if ($('tCov')) $('tCov').textContent = '98.5%';
             lastReport = {
-              zones: QZONES.map(() => 98 + Math.random() * 2),
+              zones: qcTargets.slice(),
               cqs: Math.round(100 + rnd(0, 2.4)),
               gloss: 88 + Math.floor(Math.random() * 6),
-              cov: (96 + Math.random() * 3).toFixed(1) + '%'
+              cov: '98.5%'
             };
             $('dCov').textContent = lastReport.cov;
             $('dCont').textContent = '84% → 2%';

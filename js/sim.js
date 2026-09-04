@@ -686,7 +686,7 @@ function APP() {
     scan: { k: 'scan', x: -9.0, name: 'STATION 01 · 3D LiDAR PROFILER', col: '#38BDF8', cam: 'front' },
     ion: { k: 'ion', x: -4.0, name: 'STATION 02 · 25kV ION DE-STATIC', col: '#A855F7', cam: 'portal' },
     mist: { k: 'mist', x: 1.0, name: 'STATION 03 · POLYMER ENCAPSULATOR', col: '#2DD4BF', cam: 'portal' },
-    tex: { k: 'tex', x: 6.0, name: 'STATION 04 · ROBOTIC TEXTILE ARRAY', col: '#FF6B1A', cam: 'follow' },
+    tex: { k: 'tex', x: 6.0, name: 'STATION 04 · SEGMENTED TEXTILE ARRAY', col: '#FF6B1A', cam: 'follow' },
     air: { k: 'air', x: 11.0, name: 'STATION 05 · AIR-KNIFE TURBINE DRYER', col: '#F59E0B', cam: 'left' },
     gloss: { k: 'gloss', x: 16.0, name: 'STATION 06 · SiO₂ CERAMIC NANO-COATER', col: '#EC4899', cam: 'hero' }
   };
@@ -854,8 +854,8 @@ function APP() {
   });
 
   /* Station 04: Robotic Multi-Axis Microfiber Detailing Array (x = 6.0) — SECTION CARS24 ORANGE */
-  const station4 = makeStationArch(6.0, 'STATION 04 · ROBOTIC TEXTILE ARRAY', '#FF6B1A', 5.6, 6.0, (g, w, h) => {
-    /* Overhead heavy articulated robotic carriage in signature orange */
+  const station4 = makeStationArch(6.0, 'STATION 04 · SEGMENTED TEXTILE ARRAY', '#FF6B1A', 5.6, 6.0, (g, w, h) => {
+    /* Overhead articulated textile carriage in signature orange */
     const carriage = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.45, 2.6), new THREE.MeshStandardMaterial({ color: 0x261608, roughness: 0.6 }));
     carriage.position.set(0, h - 0.45, 0); g.add(carriage);
 

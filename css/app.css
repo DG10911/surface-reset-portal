@@ -448,7 +448,7 @@ body.estop #stage::before{
 .ba-tag.live{color:var(--live)}
 .car-svg{width:100%;height:80px}
 .car-svg.dirty path:first-child{fill:#4a4036}
-.car-svg.dirty{filter:url(#none) saturate(.6) contrast(1.1)}
+.car-svg.dirty{filter:saturate(.6) contrast(1.1)}
 .ba-car#baBefore::after{content:'';position:absolute;inset:28px 12px 14px;background:repeating-radial-gradient(circle at 20% 40%, rgba(80,60,30,.45) 0 2px, transparent 2px 7px);pointer-events:none;mix-blend-mode:multiply;opacity:var(--dirt,.85);transition:opacity .35s var(--ease)}
 .ba-car#baBefore.clean::after{opacity:0}
 .ba-gauge{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:140px}
@@ -807,7 +807,7 @@ table.data.comp td:nth-child(4){color:var(--orange);font-weight:600}
 /* === Modules page Gantt === */
 .mpage-gantt{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
 .mg-axis{
-  display:flex;justify-content:space-between;padding-left:70px;
+  display:flex;justify-content:space-between;padding-left:74px;
   font-family:var(--font-m);font-size:9px;color:var(--muted);margin-bottom:4px;
 }
 .mg-row{

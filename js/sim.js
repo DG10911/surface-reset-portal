@@ -65,6 +65,7 @@ function APP() {
   ];
   const CYCLE = 22.6;
   const LANE = { qStart: -32, portalIn: -11.5, portalOut: 18.0, qc: 18.8, finish: 25.5, done: 31 };
+  const BELT = (18.0 - (-11.5)) / 22.6; /* one conveyor speed end-to-end (no wheel slip) */
   const ZONE_CLEAR = { roof: [5.6, 9.4], hood: [7.0, 10.8], front: [6.1, 9.9], left: [8.0, 12.7], right: [8.0, 12.7], rear: [9.9, 14.1], wheels: [10.4, 15.1], underbody: [8.0, 14.0] };
   const QZONES = ['ROOF', 'HOOD', 'LEFT', 'RIGHT', 'REAR', 'WHEELS', 'UNDERBODY'];
   const VEHICLES = {
@@ -1534,7 +1535,7 @@ function APP() {
     const pane = { simulation: 'paneSim', cameras: 'paneCam', twin: 'paneTwin', engineering: 'paneEng' }[p] || 'paneSim';
     document.querySelectorAll('.rail-pane').forEach(x => x.classList.toggle('on', x.id === pane));
     $('railTitle').textContent = ({ simulation: 'Live modules', cameras: 'Camera bank', twin: 'Digital twin', engineering: 'Engineering' }[p] || 'Live modules');
-    $('railSub').textContent = p === 'twin' ? 'controller graph' : p === 'cameras' ? '14 viewpoints' : p === 'engineering' ? 'envelope' : p === 'modules' ? '6 cleaning stages' : 'overlapped';
+    $('railSub').textContent = p === 'twin' ? 'controller graph' : p === 'cameras' ? (CAMS.length + ' viewpoints') : p === 'engineering' ? 'envelope' : p === 'modules' ? '6 cleaning stages' : 'overlapped';
     if (p === 'engineering') { engineering = true; setToggle($('engTog'), true); $('engLabels').hidden = false; engGroup.visible = true; }
     if (p === 'analytics') drawAllCharts();
     if (p === 'quality') renderQcFull();
@@ -2135,7 +2136,7 @@ function APP() {
   /* payback */
   function pay() {
     const cpd = +$('cpd').value; $('cpdV').textContent = cpd + ' cars/day';
-    const months = 1850000 / (135 * cpd * 30); $('payV').textContent = clamp(months, 8, 15).toFixed(1) + ' months · model';
+    const months = 1850000 / (120 * cpd * 30); $('payV').textContent = clamp(months, 8, 15).toFixed(1) + ' months · model';
   }
   $('cpd').oninput = pay; pay();
   let dataRange = 'live';
@@ -2193,7 +2194,7 @@ function APP() {
 
   /* QC */
   function qcBegin() {
-    qcT = 0; qcScores = QZONES.map(() => 98 + Math.random() * 2);
+    qcT = 0; qcScores = [99.4, 99.0, 99.2, 99.1, 98.6, 98.3, 97.9];
     $('passBadge').style.display = 'none'; $('gAfter').textContent = '— GU';
     $('gBefore').textContent = (55 + Math.floor(Math.random() * 10)) + ' GU';
   }
@@ -2343,7 +2344,7 @@ function APP() {
 
   /* keyboard */
   addEventListener('keydown', e => {
-    if (e.target.matches('input,textarea')) return;
+    if (e.target instanceof Element && e.target.matches('input,textarea,select,button')) return;
     if (e.code === 'Space') { e.preventDefault(); if (flow === 'idle') startFlow(); else togglePause(); }
     if (e.key === 'r' || e.key === 'R') resetFlow();
     if (e.key === 'e' || e.key === 'E') $('engTog').click();
@@ -2380,7 +2381,7 @@ function APP() {
     $('narr').style.opacity = introOn ? '0' : '1';
 
     const beltOn = convRun && !paused && !estop && (flow === 'queueAdv' || flow === 'entry' || flow === 'exit' || flow === 'qc' || flow === 'inportal' || conveyorForced);
-    if (beltOn) beltStrips.forEach(s => { s.position.x += dt * 2.4 * convSpd * convDir; if (s.position.x > 32) s.position.x = -34; if (s.position.x < -34) s.position.x = 32; });
+    if (beltOn) beltStrips.forEach(s => { s.position.x += dt * BELT * convSpd * convDir; if (s.position.x > 32) s.position.x = -34; if (s.position.x < -34) s.position.x = 32; });
     [-9.0, -4.0, 1.0, 6.0, 11.0, 16.0].forEach((sx, idx) => {
       if (proxSensors[idx] && hero) {
         const near = Math.abs(hero.position.x - sx) < 2.5;
@@ -2415,7 +2416,7 @@ function APP() {
         }
       } else if (flow === 'entry') {
         flowT += dt;
-        hero.position.x += dt * 2.8 * convSpd;
+        hero.position.x += dt * BELT * convSpd;
         curtains.forEach(c => c.material.opacity = 0.35);
         fireLogOnce('entry', 'Vehicle at portal threshold', 'info');
         setNarr('ENTRY', '#2EE59D', 'Conveyor: transport, not process', 'The car rides the conveyor into the portal. All processing happens inside — seven modules, one 22.6-second overlapped cycle.', '#2EE59D');
@@ -2460,6 +2461,17 @@ function APP() {
               fireSfx(m.k);
             }
           });
+          /* live QC fill — each panel score rises as the field reaches it (staggered) */
+          {
+            const QCFIN = [99.4, 99.0, 99.2, 99.1, 98.6, 98.3, 97.9];
+            QZONES.forEach((z, i) => {
+              const uu = clamp((cycleT - (3 + i * 2)) / 4.5, 0, 1);
+              const zf = $('zf' + i), zv = $('zv' + i);
+              if (zf) { zf.style.width = (uu * 100) + '%'; zv.textContent = uu > 0.03 ? Math.round(uu * QCFIN[i]) : '—'; }
+            });
+            if ($('tCqs')) $('tCqs').textContent = cycleT > 4 ? Math.round(clamp((cycleT - 4) / 15, 0, 1) * 100) : '—';
+            if ($('tCov')) $('tCov').textContent = Math.round(u * 98.5) + '%';
+          }
           if (cycleT >= CYCLE) {
             flow = 'exit'; flowT = 0; carsToday++; if (hubStore[currentHub]) hubStore[currentHub].cars = carsToday; waterToday += 118;
             fireSfx('complete');
@@ -2467,15 +2479,19 @@ function APP() {
             cqsHist.push(100 + rnd(0, 2.4));
             $('stCount').textContent = pad(carsToday, 3);
             lastReport = {
-              zones: QZONES.map(() => 98 + Math.random() * 2),
+              zones: [99.4, 99.0, 99.2, 99.1, 98.6, 98.3, 97.9].slice(0, QZONES.length),
               cqs: Math.round(100 + rnd(0, 2.4)),
-              gloss: 88 + Math.floor(Math.random() * 6),
-              cov: (96 + Math.random() * 3).toFixed(1) + '%'
+              gloss: 94,
+              cov: '98.5%'
             };
             $('dCov').textContent = lastReport.cov;
             $('dCont').textContent = '84% → 2%';
             $('dGloss').textContent = lastReport.gloss + ' GU';
-            $('dProt').textContent = (92 + Math.random() * 6).toFixed(0) + '%';
+            $('dProt').textContent = '98.5%';
+            /* lock QC rail bars to final panel scores */
+            QZONES.forEach((z, i) => { if ($('zf' + i)) { $('zf' + i).style.width = lastReport.zones[i] + '%'; $('zv' + i).textContent = Math.round(lastReport.zones[i]); } });
+            if ($('tCqs')) $('tCqs').textContent = lastReport.cqs;
+            if ($('tCov')) $('tCov').textContent = '98.5%';
             log('Cycle complete · 22.60 s', 'ok');
             if (presOn) {
               setTimeout(() => showQuote('The bottleneck was not speed. It was sequence.', 3200), 3600);
@@ -2485,7 +2501,7 @@ function APP() {
         }
       } else if (flow === 'exit') {
         flowT += dt;
-        hero.position.x += dt * 3.2 * convSpd;
+        hero.position.x += dt * BELT * convSpd;
         // As car glides past qcArch at 18.8:
         if (hero.position.x >= 18.0 && hero.position.x <= 19.8) {
           qcBeam.material.opacity = 0.35 + 0.15 * Math.sin(T * 8);
@@ -2523,9 +2539,10 @@ function APP() {
     }
 
     if (hero) {
-      const dx = hero.position.x - (hero.userData.lastX || hero.position.x);
+      let dx = hero.position.x - (hero.userData.lastX || hero.position.x);
       hero.userData.lastX = hero.position.x;
-      const rot = dx / 0.34;
+      if (Math.abs(dx) > 2) dx = 0; /* teleport/jump: no violent spin */
+      const rot = dx / 0.47; /* true tyre outer radius (roll without slip) */
       hero.userData.wheels.forEach(w => {
         w.rotation.z -= rot;
         if (w.userData.sp) w.userData.sp.rotation.z -= rot;

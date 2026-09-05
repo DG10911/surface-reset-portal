@@ -691,10 +691,10 @@ function APP() {
     scan: { k: 'scan', x: -9.0, name: 'STATION 01 · 3D LiDAR PROFILER', col: '#38BDF8', cam: 'front' },
     ion: { k: 'ion', x: -4.0, name: 'STATION 02 · 25kV ION DE-STATIC', col: '#A855F7', cam: 'portal' },
     mist: { k: 'mist', x: 1.0, name: 'STATION 03 · POLYMER ENCAPSULATOR', col: '#2DD4BF', cam: 'portal' },
-    tex: { k: 'tex', x: 6.0, name: 'STATION 04 · ROBOTIC TEXTILE ARRAY', col: '#FF6B1A', cam: 'follow' },
+    tex: { k: 'tex', x: 6.0, name: 'STATION 04 · SEGMENTED TEXTILE ARRAY', col: '#FF6B1A', cam: 'follow' },
     air: { k: 'air', x: 11.0, name: 'STATION 05 · AIR-KNIFE TURBINE DRYER', col: '#F59E0B', cam: 'left' },
-    bottom: { k: 'bottom', x: 8.5, name: 'STATION 07 · UNDERBODY HYDRO WASH', col: '#06B6D4', cam: 'portal' },
-    gloss: { k: 'gloss', x: 16.0, name: 'STATION 06 · SiO₂ CERAMIC NANO-COATER', col: '#EC4899', cam: 'hero' }
+    bottom: { k: 'bottom', x: 8.5, name: 'STATION 06 · UNDERBODY HYDRO WASH', col: '#06B6D4', cam: 'portal' },
+    gloss: { k: 'gloss', x: 16.0, name: 'STATION 07 · SiO₂ CERAMIC NANO-COATER', col: '#EC4899', cam: 'hero' }
   };
 
   const MACHINES = new THREE.Group(); scene.add(MACHINES);
@@ -860,7 +860,7 @@ function APP() {
   });
 
   /* Station 04: Robotic Multi-Axis Microfiber Detailing Array (x = 6.0) — SECTION CARS24 ORANGE */
-  const station4 = makeStationArch(6.0, 'STATION 04 · ROBOTIC TEXTILE ARRAY', '#FF6B1A', 5.6, 6.0, (g, w, h) => {
+  const station4 = makeStationArch(6.0, 'STATION 04 · SEGMENTED TEXTILE ARRAY', '#FF6B1A', 5.6, 6.0, (g, w, h) => {
     /* Overhead heavy articulated robotic carriage in signature orange */
     const carriage = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.45, 2.6), new THREE.MeshStandardMaterial({ color: 0x261608, roughness: 0.6 }));
     carriage.position.set(0, h - 0.45, 0); g.add(carriage);
@@ -919,7 +919,7 @@ function APP() {
   });
 
   /* Station 06: Automated Nano-Ceramic SiO2 Quartz Coater & IR Curing (x = 16.0) — SECTION QUARTZ ROSE */
-  makeStationArch(16.0, 'STATION 06 · SiO₂ CERAMIC NANO-COATER', '#EC4899', 4.8, 4.8, (g, w, h) => {
+  makeStationArch(16.0, 'STATION 07 · SiO₂ CERAMIC NANO-COATER', '#EC4899', 4.8, 4.8, (g, w, h) => {
     /* Overhead Radiant Quartz Infrared (IR) curing lamp bank */
     [-1.2, 0, 1.2].forEach(z => {
       const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.8, 8), new THREE.MeshStandardMaterial({
@@ -944,7 +944,7 @@ function APP() {
   });
 
   /* Station 07: High-Pressure Underbody Hydro Wash System (x = 8.5) — SECTION OCEAN CYAN */
-  makeStationArch(8.5, 'STATION 07 · UNDERBODY HYDRO WASH', '#06B6D4', 5.2, 4.6, (g, w, h) => {
+  makeStationArch(8.5, 'STATION 06 · UNDERBODY HYDRO WASH', '#06B6D4', 5.2, 4.6, (g, w, h) => {
     /* Recessed drain tray with perforated steel grate */
     const drainTray = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.15, w - 0.6), new THREE.MeshStandardMaterial({
       color: 0x1a2832, metalness: 0.7, roughness: 0.35

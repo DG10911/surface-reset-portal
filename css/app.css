@@ -471,13 +471,14 @@ body.cine #nav,body.cine #rail,body.cine #top,body.cine #dock,body.cine #intro,b
 body.cine #app{grid-template-columns:1fr;grid-template-rows:1fr}
 body.cine #stage{grid-column:1;grid-row:1}
 body.cine #views{display:none}
-.cine-stage{position:relative;z-index:2;padding:24px;max-width:18ch}
+.cine-stage{position:relative;z-index:2;padding:24px;max-width:min(92vw,760px)}
 .cine-mark{
-  display:inline-flex;align-items:center;height:36px;padding:0 12px;background:var(--yellow);color:#0B0C0E;
-  font-family:var(--font-d);font-weight:700;font-size:28px;letter-spacing:.06em;opacity:0;transform:translateY(10px);
+  display:inline-block;padding:7px 16px;background:var(--yellow);color:#0B0C0E;
+  font-family:var(--font-d);font-weight:700;font-size:clamp(22px,4vw,30px);line-height:1;letter-spacing:.06em;
+  white-space:nowrap;text-transform:uppercase;border-radius:2px;opacity:0;transform:translateY(10px);
 }
-.cine-kicker{font-family:var(--font-d);letter-spacing:.22em;text-transform:uppercase;font-size:12px;color:var(--muted);margin:14px 0 0;opacity:0}
-.cine-q{font-family:var(--font-d);font-size:clamp(28px,4.6vw,56px);font-weight:600;letter-spacing:.04em;text-transform:uppercase;line-height:1.05;margin:18px 0 0;opacity:0;transform:translateY(12px)}
+.cine-kicker{font-family:var(--font-d);letter-spacing:.22em;text-transform:uppercase;font-size:12px;color:var(--muted);margin:14px 0 0;opacity:0;white-space:nowrap}
+.cine-q{font-family:var(--font-d);font-size:clamp(28px,4.6vw,56px);font-weight:600;letter-spacing:.04em;text-transform:uppercase;line-height:1.05;margin:18px auto 0;max-width:16ch;opacity:0;transform:translateY(12px)}
 .cine-sub{font-family:var(--font-d);letter-spacing:.18em;text-transform:uppercase;color:var(--orange);font-size:14px;margin:16px 0 0;opacity:0}
 #cineSkip{position:absolute;top:16px;right:16px;z-index:3}
 

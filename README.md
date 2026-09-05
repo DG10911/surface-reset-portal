@@ -11,11 +11,7 @@
 
 ---
 
-## 🚀 Live Deployment
 
-🌐 **Interactive 3D Digital Twin:** [https://laksh718.github.io/cars24/](https://laksh718.github.io/cars24/)
-
----
 
 ## 📋 Executive Summary
 
@@ -155,6 +151,3 @@ Open `http://localhost:5500` in your web browser.
 
 ---
 
-## 📄 License
-
-Developed by [Laksh718](https://github.com/Laksh718) for the **CARS24 Hackathon**. Released under the [MIT License](LICENSE).

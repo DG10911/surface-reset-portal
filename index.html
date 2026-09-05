@@ -171,7 +171,7 @@
       <canvas id="c3d"></canvas>
       <div id="offline">
         <b>3D engine unavailable</b>
-        <span>3D engine failed to start — reload the page. This twin runs fully in-browser, no network needed.</span>
+        <span>The three.js CDN could not be reached. Reconnect and reload — this twin runs fully in-browser.</span>
       </div>
       <div class="bracket tl"></div>
       <div class="bracket tr"></div>
@@ -196,7 +196,7 @@
       <div id="narr">
         <div class="r1"><span class="no" id="nNo">READY</span><span class="nm" id="nNm">Surface Reset Portal</span>
         </div>
-        <div class="ds" id="nDs">The bottleneck was not speed. It was sequence. Press START CYCLE — six modules fire as
+        <div class="ds" id="nDs">The bottleneck was not speed. It was sequence. Press START CYCLE — seven modules fire as
           one overlapped field for 22.6 seconds.</div>
       </div>
       <div id="soloHud" hidden>
@@ -219,7 +219,7 @@
         <div>
           <p class="kicker">Cars24 reconditioning hub · digital twin</p>
           <h1>Surface<br />Reset Portal</h1>
-          <p>Sequential detailing collapsed into a parallel cleaning field. Target cycle 22.6 seconds. Zero rinse water.
+          <p>Sequential detailing collapsed into a parallel cleaning field. Seven modules. Target cycle 22.6 seconds. Zero rinse water.
           </p>
         </div>
       </div>
@@ -236,7 +236,7 @@
         <div class="fv-head">
           <span>Parallel cleaning field</span>
           <b id="fvTime">00.00</b>
-          <span id="fvActive">0 / 6 live</span>
+          <span id="fvActive">0 / 7 live</span>
         </div>
         <div class="fv-lanes" id="fvLanes"></div>
         <div class="fv-foot">
@@ -244,8 +244,6 @@
           <i></i>
           <span>Parallel · <b>22.6 s</b></span>
         </div>
-        <p class="fv-scope">22.6&nbsp;s in-portal process · ~90&nbsp;s door-to-door incl. convey + QC · heavy-soil +60&nbsp;s
-          pre-cycle (~12% of intake, modelled)</p>
       </div>
       <div id="splitReveal">
         <div class="split-inner" style="position:relative">
@@ -254,9 +252,9 @@
           <span class="sim-tag">Studio Inspection</span>
           <p class="kicker">Before / After · Surface Reset Comparison</p>
           <div class="split-stage" id="splitStage">
-            <img id="splitBefore" alt="Inbound dirty vehicle" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='9'%3E%3Crect%20width='16'%20height='9'%20fill='%230a0b0d'/%3E%3C/svg%3E" />
+            <img id="splitBefore" alt="Inbound dirty vehicle" />
             <div class="split-after" id="splitAfterWrap">
-              <img id="splitAfter" alt="Outbound clean vehicle" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='9'%3E%3Crect%20width='16'%20height='9'%20fill='%230a0b0d'/%3E%3C/svg%3E" />
+              <img id="splitAfter" alt="Outbound clean vehicle" />
             </div>
             <div class="split-handle" id="splitHandle"><b></b></div>
             <span class="split-l">BEFORE · 84% SOIL · 58 GU</span>
@@ -287,7 +285,7 @@
             <div><span>Surface coverage</span><b id="dCov">98.5%</b></div>
             <div><span>Contamination drop</span><b id="dCont">84% → 2%</b></div>
             <div><span>Gloss estimate</span><b id="dGloss">58 → 94 GU</b></div>
-            <div><span>Protection estimate</span><b id="dProt">98.5% Monolayer</b></div>
+            <div><span>Protection estimate</span><b id="dProt">96% Monolayer</b></div>
           </div>
           <div class="done-actions" style="flex-wrap:wrap">
             <button class="btn btn-run" id="doneToggle3D">⚡ View BEFORE (Dirty)</button>
@@ -337,8 +335,11 @@
               <rect class="sz" id="szREAR" x="48" y="160" width="64" height="28" />
               <rect class="sz" id="szGLASS" x="50" y="70" width="60" height="22" />
               <rect class="sz" id="szMIRRORS" x="28" y="62" width="104" height="10" />
+              <rect class="sz" id="szBOTTOM" x="40" y="190" width="80" height="18" rx="2" />
               <text x="80" y="78" text-anchor="middle" fill="#7C7870" font-size="8"
                 font-family="IBM Plex Mono">TOP</text>
+              <text x="80" y="203" text-anchor="middle" fill="#06B6D4" font-size="6"
+                font-family="IBM Plex Mono">UNDERBODY</text>
             </svg>
           </div>
           <div class="sec">Telemetry · modelled</div>
@@ -393,7 +394,7 @@
             <span>PLC state</span><b id="twPlc">IDLE</b>
             <span>Safety curtain</span><b id="twSafe">CLEAR</b>
             <span>Conveyor</span><b id="twConv">STOPPED</b>
-            <span>Active modules</span><b id="twAct">0 / 6</b>
+            <span>Active modules</span><b id="twAct">0 / 7</b>
           </div>
         </div>
 
@@ -417,7 +418,7 @@
             <button class="btn" id="cvStop">Stop</button>
           </div>
           <div class="lbl" style="margin-top:8px">Speed</div>
-          <input type="range" id="cvSpd" aria-label="Conveyor speed" min="0.4" max="2" step="0.1" value="1"
+          <input type="range" id="cvSpd" min="0.4" max="2" step="0.1" value="1"
             style="width:100%;accent-color:var(--orange)" />
           <div class="lbl" style="margin-top:8px">Direction</div>
           <div class="seg"><button class="on" data-dir="1" id="cvFwd">Forward</button><button data-dir="-1"
@@ -462,7 +463,7 @@
       </div>
       <div id="ganttWrap">
         <div class="gh">
-          <b>22.6-second overlapped cycle — six modules, one car, same instant</b>
+          <b>22.6-second overlapped cycle — seven modules, one car, same instant</b>
           <span id="liveTape" class="tape">Twin online</span>
           <span id="gpct">0%</span>
         </div>
@@ -476,6 +477,7 @@
             <button type="button" data-jump="3.8">3.8s Mist</button>
             <button type="button" data-jump="5.6">5.6s Textile</button>
             <button type="button" data-jump="11.3">11.3s Knife</button>
+            <button type="button" data-jump="8.0">8.0s Bottom</button>
             <button type="button" data-jump="19.5">19.5s Gloss</button>
             <button type="button" data-jump="22.6">22.6s Done</button>
           </div>
@@ -488,8 +490,9 @@
             <button type="button" class="btn-solo-tab" data-solo="mist">03 Mist</button>
             <button type="button" class="btn-solo-tab" data-solo="tex">04 Textile</button>
             <button type="button" class="btn-solo-tab" data-solo="air">05 Knife</button>
+            <button type="button" class="btn-solo-tab" data-solo="bottom">07 Bottom</button>
             <button type="button" class="btn-solo-tab" data-solo="gloss">06 Gloss</button>
-            <button type="button" class="btn-solo-tab solo-all" id="soloStepAllBtn">▶ 6 Steps</button>
+            <button type="button" class="btn-solo-tab solo-all" id="soloStepAllBtn">▶ 7 Steps</button>
           </div>
         </div>
         <div class="gaxis">
@@ -682,10 +685,10 @@
               </tbody>
             </table>
             <p style="font-size:11px;color:var(--muted);margin:10px 0 6px">Volume slider · payback 8–15 month band</p>
-            <input type="range" id="roiCpd" aria-label="Cars per day" min="30" max="120" value="60"
+            <input type="range" id="roiCpd" min="30" max="120" value="60"
               style="width:100%;accent-color:var(--orange)" />
             <div style="display:flex;justify-content:space-between;font-family:var(--font-m);font-size:12px"><span
-                id="roiCpdV">60 cars/day</span><b id="roiPay2">8.0 months</b></div>
+                id="roiCpdV">60 cars/day</span><b id="roiPay2">— months</b></div>
           </div>
           <div class="panel">
             <h3>200-hub network · modelled</h3>
@@ -924,10 +927,10 @@
             </table>
             <p style="font-size:11px;color:var(--muted);margin:10px 0 0">Opex target ~₹120/car · payback 8–15 months ·
               business case</p>
-            <input type="range" id="cpd" aria-label="Cars per day" min="30" max="120" value="60"
+            <input type="range" id="cpd" min="30" max="120" value="60"
               style="width:100%;accent-color:var(--orange);margin-top:8px" />
             <div style="display:flex;justify-content:space-between;font-family:var(--font-m);font-size:12px"><span
-                id="cpdV">60 cars/day</span><b id="payV">8.0 months</b></div>
+                id="cpdV">60 cars/day</span><b id="payV">— months</b></div>
           </div>
         </div>
       </article>
@@ -960,7 +963,7 @@
           </div>
           <div>
             <div class="k">Uptime target</div>
-            <div class="v">99.5%</div>
+            <div class="v">99.2%</div>
             <div class="h">design case</div>
           </div>
         </div>
@@ -1038,9 +1041,8 @@
           <div class="panel">
             <h3>Scan demo — dirt triage</h3>
             <p style="font-size:12px;color:var(--ink-2);margin:0 0 10px">Point a webcam at a surface or upload a panel
-              photo. This is an <b>illustrative luminance demo</b>, not soil metrology — it shows how a per-panel
-              soil index would route standard cars to the 22.6&nbsp;s program and heavy soil to a 60&nbsp;s pre-cycle.
-              Production uses gravimetric / image-based soil sensing.</p>
+              photo. Zones classify by luminance deviation — the same logic that routes standard cars to 22.6s and heavy
+              soil to a 60s pre-cycle.</p>
             <div class="ctrl-row" style="margin-bottom:10px">
               <button class="btn btn-run" id="camStart">Start webcam</button>
               <button class="btn" id="upBtn">Upload photo</button>
@@ -1049,10 +1051,61 @@
             </div>
             <div id="feedWrap">
               <video id="vid" autoplay playsinline muted></video>
-              <img id="scanImg" alt="Analyzed camera frame" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='9'%3E%3Crect%20width='16'%20height='9'%20fill='%230a0b0d'/%3E%3C/svg%3E" hidden />
+              <img id="scanImg" alt="" hidden />
               <div id="gridOv"></div>
             </div>
             <div id="verdict">Awaiting frame…</div>
+          </div>
+        </div>
+        <div class="panel qc-sensors-panel" style="margin-top:20px">
+          <h3>QC Sensor Diagnostics · Automated Quality Determination</h3>
+          <p style="font-size:11px;color:var(--muted);margin:0 0 14px">Five precision sensors fire as the vehicle passes through the QC inspection arch. Each sensor determines a quality metric against the Cars24 standard. Values are simulation estimates.</p>
+          <div class="qc-sensors-grid" id="qcSensorsGrid">
+            <div class="qs-card" id="qcSensor_glossmeter">
+              <div class="qs-icon" style="color:#06B6D4">◈</div>
+              <div class="qs-info">
+                <span class="qs-name">Glossmeter</span>
+                <span class="qs-val">— GU</span>
+              </div>
+              <span class="qs-status scanning">STANDBY</span>
+              <canvas class="qs-spark" width="120" height="32"></canvas>
+            </div>
+            <div class="qs-card" id="qcSensor_spectro">
+              <div class="qs-icon" style="color:#A855F7">◉</div>
+              <div class="qs-info">
+                <span class="qs-name">Spectrophotometer ΔE</span>
+                <span class="qs-val">— ΔE</span>
+              </div>
+              <span class="qs-status scanning">STANDBY</span>
+              <canvas class="qs-spark" width="120" height="32"></canvas>
+            </div>
+            <div class="qs-card" id="qcSensor_hydro">
+              <div class="qs-icon" style="color:#2DD4BF">◆</div>
+              <div class="qs-info">
+                <span class="qs-name">Hydrophobicity</span>
+                <span class="qs-val">— °</span>
+              </div>
+              <span class="qs-status scanning">STANDBY</span>
+              <canvas class="qs-spark" width="120" height="32"></canvas>
+            </div>
+            <div class="qs-card" id="qcSensor_thickness">
+              <div class="qs-icon" style="color:#EC4899">▣</div>
+              <div class="qs-info">
+                <span class="qs-name">SiO₂ Thickness</span>
+                <span class="qs-val">— nm</span>
+              </div>
+              <span class="qs-status scanning">STANDBY</span>
+              <canvas class="qs-spark" width="120" height="32"></canvas>
+            </div>
+            <div class="qs-card" id="qcSensor_roughness">
+              <div class="qs-icon" style="color:#F59E0B">▤</div>
+              <div class="qs-info">
+                <span class="qs-name">Surface Ra</span>
+                <span class="qs-val">— µm</span>
+              </div>
+              <span class="qs-status scanning">STANDBY</span>
+              <canvas class="qs-spark" width="120" height="32"></canvas>
+            </div>
           </div>
         </div>
       </article>
@@ -1091,7 +1144,7 @@
       <article class="view" id="view-modules">
         <h2>CARS24 Automated Machine Stations</h2>
         <p class="lede">In real-world Cars24 Mega Refurbishment Labs (MRLs), vehicles move along a continuous automated
-          line powered by <b>six distinct specialized machines</b>. Click <b>Solo demo</b> on any machine to inspect it
+          line powered by <b>seven distinct specialized machines</b>. Click <b>Solo demo</b> on any machine to inspect it
           in 3D, or run the full line in Sim.</p>
 
         <div class="mod-grid" id="modGrid">
@@ -1263,7 +1316,7 @@
               </table>
               <p class="mc-note">Zero rinse water is the single biggest scale unlock. Every Cars24 hub already has a
                 lane — but none have an effluent pit for a tunnel wash. Polymer mist replaces the water flood with
-                chemistry. No drain retrofit required. <b>Footnote:</b> 0 L rinse at the portal; textile laundering + mist make-up water are accounted in opex.</p>
+                chemistry. No drain retrofit required.</p>
             </div>
             <div class="mc-foot">
               <button class="btn btn-run mc-demo" data-mod="mist">▶ Solo demo</button>
@@ -1394,6 +1447,73 @@
             </div>
           </div>
 
+          <!-- 07 BOTTOM CLEANER -->
+          <div class="mod-card" id="mc_bottom" data-mod="bottom">
+            <div class="mc-header">
+              <div class="mc-num" style="background:#06B6D4;color:#0b0c0e">07</div>
+              <div class="mc-title">
+                <b>Station 07 · Underbody Hydro Wash</b>
+                <span>t = 8.0 — 14.5 s · Machine 7</span>
+              </div>
+              <div class="mc-bar-wrap">
+                <div class="mc-bar" style="left:35.4%;width:28.8%;background:#06B6D4"></div>
+              </div>
+            </div>
+            <div class="mc-body">
+              <div class="mc-vis bottom-vis">
+                <svg viewBox="0 0 120 60" class="mc-svg">
+                  <rect x="10" y="20" width="100" height="30" rx="2" fill="#1a1d22" stroke="rgba(6,182,212,.3)"
+                    stroke-width="1" />
+                  <!-- car underbody outline -->
+                  <rect x="25" y="28" width="70" height="14" rx="2" fill="#2a2f38" />
+                  <!-- floor grate -->
+                  <line x1="15" y1="50" x2="105" y2="50" stroke="#06B6D4" stroke-width="1" opacity="0.4" />
+                  <line x1="15" y1="52" x2="105" y2="52" stroke="#06B6D4" stroke-width="0.5" opacity="0.25" />
+                  <!-- upward spray jets -->
+                  <line x1="30" y1="52" x2="30" y2="42" stroke="#06B6D4" stroke-width="1.5" opacity="0.6" class="bottom-jet" />
+                  <line x1="45" y1="52" x2="45" y2="40" stroke="#06B6D4" stroke-width="1.5" opacity="0.7" class="bottom-jet" />
+                  <line x1="60" y1="52" x2="60" y2="38" stroke="#06B6D4" stroke-width="2" opacity="0.8" class="bottom-jet" />
+                  <line x1="75" y1="52" x2="75" y2="40" stroke="#06B6D4" stroke-width="1.5" opacity="0.7" class="bottom-jet" />
+                  <line x1="90" y1="52" x2="90" y2="42" stroke="#06B6D4" stroke-width="1.5" opacity="0.6" class="bottom-jet" />
+                  <!-- spray fans -->
+                  <circle cx="45" cy="39" r="3" fill="#06B6D4" opacity="0.25" class="bottom-spray" />
+                  <circle cx="60" cy="37" r="4" fill="#06B6D4" opacity="0.2" class="bottom-spray" />
+                  <circle cx="75" cy="39" r="3" fill="#06B6D4" opacity="0.25" class="bottom-spray" />
+                  <text x="60" y="12" text-anchor="middle" fill="#06B6D4" font-size="7" font-family="IBM Plex Mono">UPWARD JETS · ZERO POOLING</text>
+                </svg>
+              </div>
+              <table class="mc-spec">
+                <tr>
+                  <td>Technology</td>
+                  <td>High-pressure upward spray nozzle array through conveyor gaps</td>
+                </tr>
+                <tr>
+                  <td>Coverage</td>
+                  <td>Underbody, wheel wells, sills, rocker panels</td>
+                </tr>
+                <tr>
+                  <td>Duration</td>
+                  <td>8.0 – 14.5 s (overlaps textile from 8.0 s)</td>
+                </tr>
+                <tr>
+                  <td>Drain system</td>
+                  <td>Integrated recirculation tray — zero pooling</td>
+                </tr>
+                <tr>
+                  <td>Capex share</td>
+                  <td>₹1.2 L (jets + pump + drain tray)</td>
+                </tr>
+              </table>
+              <p class="mc-note">The underbody is the most neglected surface in reconditioning — and the most corrosion-prone.
+                Upward jets fire through conveyor gaps while the textile array works the top and sides. The integrated
+                drain tray captures and recirculates all runoff. No floor pooling, no slip hazard.</p>
+            </div>
+            <div class="mc-foot">
+              <button class="btn btn-run mc-demo" data-mod="bottom">▶ Solo demo</button>
+              <button class="btn mc-jump" data-mod="bottom" data-t="8.0">Jump to t=8.0 in sim</button>
+            </div>
+          </div>
+
           <!-- 06 GLOSS -->
           <div class="mod-card" id="mc_gloss" data-mod="gloss">
             <div class="mc-header">
@@ -1423,7 +1543,7 @@
               <table class="mc-spec">
                 <tr>
                   <td>Chemistry</td>
-                  <td>SiO₂-based spray sealant, air-knife leveled; full cure off-line</td>
+                  <td>Ultra-thin SiO₂ hydrophobic layer</td>
                 </tr>
                 <tr>
                   <td>Output</td>
@@ -1457,8 +1577,8 @@
         <!-- Timeline strip at bottom of modules page -->
         <div class="panel" style="margin-top:20px">
           <h3>Overlap map — why 22.6 seconds</h3>
-          <p style="font-size:12px;color:var(--muted);margin:0 0 12px">Each bar = one module window. Four modules fire
-            simultaneously at peak overlap. Sequential would be 4 minutes.</p>
+          <p style="font-size:12px;color:var(--muted);margin:0 0 12px">Each bar = one module window. Up to five modules fire
+            simultaneously at peak overlap. Sequential would be 4+ minutes.</p>
           <div class="mpage-gantt">
             <div class="mg-axis">
               <span>0s</span><span>1.9s</span><span>3.8s</span><span>5.6s</span><span>7.5s</span>
@@ -1489,6 +1609,11 @@
                 <div class="mg-span" style="left:50.0%;width:33.2%;background:#F59E0B"></div>
               </div><b>7.5s</b>
             </div>
+            <div class="mg-row"><span style="color:#06B6D4">Bottom</span>
+              <div class="mg-track">
+                <div class="mg-span" style="left:35.4%;width:28.8%;background:#06B6D4"></div>
+              </div><b>6.5s</b>
+            </div>
             <div class="mg-row"><span style="color:#EC4899">Gloss</span>
               <div class="mg-track">
                 <div class="mg-span" style="left:86.3%;width:13.7%;background:#EC4899"></div>
@@ -1509,54 +1634,11 @@
     </div>
   </div>
 
-  <!-- Libraries: local copies first so the demo never depends on venue Wi-Fi -->
-  <!-- CARS24 SHOWCASE — one calm boardroom screen (reuses the live engine) -->
-  <button id="scLaunch" title="Cars24 showcase view">◇ Showcase</button>
-  <div id="showcase" aria-hidden="true">
-    <div class="sc-top">
-      <div class="sc-brand"><span class="c24b">CARS24</span><span>Surface Reset Portal</span></div>
-      <div class="sc-timer"><b id="scT">0.0</b><span>/ 22.6s</span></div>
-      <div class="sc-now" id="scStation">Ready — press Start</div>
-      <div class="sc-cams" id="scCams">
-        <button data-k="2" class="on">Follow</button><button data-k="5">Drone</button>
-        <button data-k="3">Portal</button><button data-k="1">Hero</button><span class="sc-free">drag = free orbit</span>
-      </div>
-      <button class="sc-drawerbtn" id="scMore">⋯ More</button>
-      <button class="sc-exit" id="scExit">✕ Exit</button>
-    </div>
-    <div class="sc-steps" id="scSteps"></div>
-    <aside class="sc-quality" id="scPanel"></aside>
-    <div class="sc-kpis">
-      <div><b>22.6s</b><span>per car · 10× vs manual</span></div>
-      <div><b>0 L</b><span>rinse · &lt;2 L total</span></div>
-      <div><b>40/hr</b><span>~90s door-to-door</span></div>
-      <div><b>₹18.5L</b><span>capex · ~8-mo payback</span></div>
-    </div>
-    <div class="sc-transport">
-      <button class="sc-start" id="scStart">▶ Start</button>
-      <button data-ctl="pauseBtn">Pause</button>
-      <button data-ctl="replayBtn">Replay</button>
-      <button data-ctl="resetBtn">Reset</button>
-      <button data-ctl="estopBtn" class="sc-estop">E-Stop</button>
-      <span class="sc-div"></span>
-      <div class="sc-seg" data-seg="spdSeg" data-vals="0.5,1,2" data-def="1"></div>
-      <div class="sc-seg" data-seg="vehSeg" data-vals="A,B,C" data-def="A"></div>
-      <span class="sc-div"></span>
-      <div class="sc-jumps" id="scJumps"></div>
-    </div>
-    <div class="sc-scope">22.6&nbsp;s process · ~90&nbsp;s door-to-door incl. convey + QC · heavy-soil +60&nbsp;s (~12%)</div>
-    <div class="sc-drawer" id="scDrawer" hidden>
-      <div class="sc-drawer-head"><b>All views</b><button id="scDrawerClose">✕</button></div>
-      <div class="sc-drawer-grid" id="scDrawerGrid"></div>
-    </div>
-  </div>
-
-  <script src="js/vendor/three.min.js"></script>
-  <script src="js/vendor/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="js/fx.js"></script>
   <script src="js/sim.js"></script>
   <script src="js/enhance.js"></script>
-  <script src="js/patch.js"></script>
 </body>
 
 </html>

@@ -55,15 +55,18 @@ function APP() {
       ds: 'High-velocity air sheets strip residual moisture. No drying tunnel.'
     },
     {
+      k: 'bottom', s: 8.0, e: 14.5, nm: 'Underbody hydro wash', short: 'Bottom', col: '#06B6D4',
+      ds: 'High-pressure upward jets clean underbody, wheel wells, and sills through conveyor gaps. Zero pooling — integrated drain tray recirculates.'
+    },
+    {
       k: 'gloss', s: 19.5, e: 22.6, nm: 'Gloss + protect', short: 'Gloss', col: '#EC4899',
-      ds: 'SiO₂-based spray sealant, air-knife leveled; full cure off-line. Gloss/hydrophobicity are simulation estimates.'
+      ds: 'Ultra-thin SiO₂ hydrophobic layer. Gloss, uniformity, hydrophobicity are simulation estimates.'
     }
   ];
   const CYCLE = 22.6;
   const LANE = { qStart: -32, portalIn: -11.5, portalOut: 18.0, qc: 18.8, finish: 25.5, done: 31 };
-  const BELT = (18.0 - (-11.5)) / 22.6; /* conveyor speed, units/s — one constant end-to-end (no wheel slip) */
-  const ZONE_CLEAR = { roof: [5.6, 9.4], hood: [7.0, 10.8], front: [6.1, 9.9], left: [8.0, 12.7], right: [8.0, 12.7], rear: [9.9, 14.1], wheels: [10.4, 15.1] };
-  const QZONES = ['ROOF', 'HOOD', 'LEFT', 'RIGHT', 'REAR', 'WHEELS'];
+  const ZONE_CLEAR = { roof: [5.6, 9.4], hood: [7.0, 10.8], front: [6.1, 9.9], left: [8.0, 12.7], right: [8.0, 12.7], rear: [9.9, 14.1], wheels: [10.4, 15.1], underbody: [8.0, 14.0] };
+  const QZONES = ['ROOF', 'HOOD', 'LEFT', 'RIGHT', 'REAR', 'WHEELS', 'UNDERBODY'];
   const VEHICLES = {
     A: { type: 'sedan', color: 0xf0f2f4, label: 'CAR24-A-001' },
     B: { type: 'hatchback', color: 0xb02430, label: 'CAR24-B-002' },
@@ -83,7 +86,6 @@ function APP() {
   let introT = 0, introOn = true;
   let presOn = false, quoteOn = false;
   let qcT = 0, qcScores = [];
-  let qcTargets = QZONES.map(() => 0);
   let lastReport = null;
   let cineOn = false, cineTl = null, wakeT = -1;
   let snapBefore = null, snapAfter = null, wantSnap = null;
@@ -106,7 +108,7 @@ function APP() {
   }
   const cqsHist = [];
   const logs = [];
-  const manualOn = { scan: false, ion: false, mist: false, tex: false, air: false, gloss: false };
+  const manualOn = { scan: false, ion: false, mist: false, tex: false, air: false, bottom: false, gloss: false };
   let hero = null;
   let conveyorForced = false;
 
@@ -688,8 +690,9 @@ function APP() {
     scan: { k: 'scan', x: -9.0, name: 'STATION 01 · 3D LiDAR PROFILER', col: '#38BDF8', cam: 'front' },
     ion: { k: 'ion', x: -4.0, name: 'STATION 02 · 25kV ION DE-STATIC', col: '#A855F7', cam: 'portal' },
     mist: { k: 'mist', x: 1.0, name: 'STATION 03 · POLYMER ENCAPSULATOR', col: '#2DD4BF', cam: 'portal' },
-    tex: { k: 'tex', x: 6.0, name: 'STATION 04 · SEGMENTED TEXTILE ARRAY', col: '#FF6B1A', cam: 'follow' },
+    tex: { k: 'tex', x: 6.0, name: 'STATION 04 · ROBOTIC TEXTILE ARRAY', col: '#FF6B1A', cam: 'follow' },
     air: { k: 'air', x: 11.0, name: 'STATION 05 · AIR-KNIFE TURBINE DRYER', col: '#F59E0B', cam: 'left' },
+    bottom: { k: 'bottom', x: 8.5, name: 'STATION 07 · UNDERBODY HYDRO WASH', col: '#06B6D4', cam: 'portal' },
     gloss: { k: 'gloss', x: 16.0, name: 'STATION 06 · SiO₂ CERAMIC NANO-COATER', col: '#EC4899', cam: 'hero' }
   };
 
@@ -856,8 +859,8 @@ function APP() {
   });
 
   /* Station 04: Robotic Multi-Axis Microfiber Detailing Array (x = 6.0) — SECTION CARS24 ORANGE */
-  const station4 = makeStationArch(6.0, 'STATION 04 · SEGMENTED TEXTILE ARRAY', '#FF6B1A', 5.6, 6.0, (g, w, h) => {
-    /* Overhead articulated textile carriage in signature orange */
+  const station4 = makeStationArch(6.0, 'STATION 04 · ROBOTIC TEXTILE ARRAY', '#FF6B1A', 5.6, 6.0, (g, w, h) => {
+    /* Overhead heavy articulated robotic carriage in signature orange */
     const carriage = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.45, 2.6), new THREE.MeshStandardMaterial({ color: 0x261608, roughness: 0.6 }));
     carriage.position.set(0, h - 0.45, 0); g.add(carriage);
 
@@ -938,6 +941,62 @@ function APP() {
     const canister = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.8, 12), brushedAlum());
     canister.position.set(0, 1.3, w / 2 + 0.65); g.add(canister);
   });
+
+  /* Station 07: High-Pressure Underbody Hydro Wash System (x = 8.5) — SECTION OCEAN CYAN */
+  makeStationArch(8.5, 'STATION 07 · UNDERBODY HYDRO WASH', '#06B6D4', 5.2, 4.6, (g, w, h) => {
+    /* Recessed drain tray with perforated steel grate */
+    const drainTray = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.15, w - 0.6), new THREE.MeshStandardMaterial({
+      color: 0x1a2832, metalness: 0.7, roughness: 0.35
+    }));
+    drainTray.position.set(0, -0.05, 0); g.add(drainTray);
+    /* Grate lines */
+    for (let gz = -w/2 + 0.6; gz <= w/2 - 0.6; gz += 0.4) {
+      const gLine = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.03, 0.05), new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.6, metalness: 0.4 }));
+      gLine.position.set(0, 0.06, gz); g.add(gLine);
+    }
+
+    /* Floor-mounted high-pressure spray nozzle array — upward facing */
+    const nozzlePositions = [[-1.8, 0], [-0.9, -0.8], [-0.9, 0.8], [0, 0], [0.9, -0.8], [0.9, 0.8], [1.8, 0]];
+    nozzlePositions.forEach(([nx, nz]) => {
+      const nozzleBase = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.2, 12), steel());
+      nozzleBase.position.set(nx, 0.12, nz); g.add(nozzleBase);
+      const nozzleTip = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.12, 8), new THREE.MeshStandardMaterial({
+        color: 0x06b6d4, emissive: 0x0891b2, emissiveIntensity: 0.5
+      }));
+      nozzleTip.position.set(nx, 0.28, nz); g.add(nozzleTip);
+    });
+
+    /* Recirculation pump enclosure */
+    const pumpBox = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.0, 0.6), darkMatte());
+    pumpBox.position.set(0, 0.5, -w/2 - 0.7); g.add(pumpBox);
+    const pumpLabel = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.28), new THREE.MeshBasicMaterial({
+      map: textTex('RECIRC PUMP', '#0B0C0E', '#06B6D4', 280, 140, 52)
+    }));
+    pumpLabel.position.set(0.37, 0.55, -w/2 - 0.7); pumpLabel.rotation.y = Math.PI / 2; g.add(pumpLabel);
+
+    /* Side-mounted pressure gauge */
+    const gauge = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.06, 16), new THREE.MeshStandardMaterial({
+      color: 0x06b6d4, emissive: 0x06b6d4, emissiveIntensity: 0.3
+    }));
+    gauge.rotation.x = Math.PI / 2; gauge.position.set(0, 1.2, -w/2 - 0.35); g.add(gauge);
+
+    /* Overhead splash guard canopy */
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.08, w - 1.0), new THREE.MeshStandardMaterial({
+      color: 0x0e7490, metalness: 0.5, roughness: 0.4, transparent: true, opacity: 0.65
+    }));
+    canopy.position.set(0, 1.6, 0); g.add(canopy);
+  });
+
+  /* Bottom cleaner spray visuals (upward jets) */
+  const bottomJets = new THREE.Group(); scene.add(bottomJets); bottomJets.visible = false;
+  const jetMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.0, blending: THREE.AdditiveBlending, depthWrite: false });
+  for (let j = 0; j < 7; j++) {
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(0.12, 1.2, 8), jetMat.clone());
+    const jx = [-1.8, -0.9, -0.9, 0, 0.9, 0.9, 1.8][j];
+    const jz = [0, -0.8, 0.8, 0, -0.8, 0.8, 0][j];
+    cone.position.set(jx, 0.7, jz);
+    bottomJets.add(cone);
+  }
 
   const portalLight = new THREE.PointLight(0xff6b1a, 0, 24); portalLight.position.set(6.0, 3.2, 0); scene.add(portalLight);
 
@@ -1386,7 +1445,7 @@ function APP() {
     $('passBadge').style.display = 'none';
     $('cqsBig').textContent = '—';
     QZONES.forEach((_, i) => { $('zf' + i).style.width = '0'; $('zv' + i).textContent = '—'; });
-    setNarr('READY', '#FF6B1A', 'Surface Reset Portal', 'The bottleneck was not speed. It was sequence. Press START CYCLE — six modules fire as one overlapped field for 22.6 seconds.');
+    setNarr('READY', '#FF6B1A', 'Surface Reset Portal', 'The bottleneck was not speed. It was sequence. Press START CYCLE — seven modules fire as one overlapped field for 22.6 seconds.');
     updatePauseBtn();
     log('Reset · twin returned to idle', 'warn');
   }
@@ -1475,7 +1534,7 @@ function APP() {
     const pane = { simulation: 'paneSim', cameras: 'paneCam', twin: 'paneTwin', engineering: 'paneEng' }[p] || 'paneSim';
     document.querySelectorAll('.rail-pane').forEach(x => x.classList.toggle('on', x.id === pane));
     $('railTitle').textContent = ({ simulation: 'Live modules', cameras: 'Camera bank', twin: 'Digital twin', engineering: 'Engineering' }[p] || 'Live modules');
-    $('railSub').textContent = p === 'twin' ? 'controller graph' : p === 'cameras' ? (CAMS.length + ' viewpoints') : p === 'engineering' ? 'envelope' : p === 'modules' ? '6 cleaning stages' : 'overlapped';
+    $('railSub').textContent = p === 'twin' ? 'controller graph' : p === 'cameras' ? '14 viewpoints' : p === 'engineering' ? 'envelope' : p === 'modules' ? '6 cleaning stages' : 'overlapped';
     if (p === 'engineering') { engineering = true; setToggle($('engTog'), true); $('engLabels').hidden = false; engGroup.visible = true; }
     if (p === 'analytics') drawAllCharts();
     if (p === 'quality') renderQcFull();
@@ -1902,7 +1961,7 @@ function APP() {
     // SFX & Narrator
     if (sfx) { sfx.unlock(); if (sfxOn) sfx.startHum(); }
     fireSfx(k);
-    setNarr('MODULE ' + pad(soloStepIdx + 1, 2) + ' / 06 (ISOLATED)', m.col, m.nm + ' — Isolated run', m.ds, m.col);
+    setNarr('MODULE ' + pad(soloStepIdx + 1, 2) + ' / 07 (ISOLATED)', m.col, m.nm + ' — Isolated run', m.ds, m.col);
     log('Module demo · ' + m.nm + ' (isolated)', 'ok');
 
     // Update solo HUD
@@ -2162,6 +2221,66 @@ function APP() {
       '<p style="margin:12px 0 0;font-family:var(--font-m)">CQS ' + lastReport.cqs + ' · gloss ' + lastReport.gloss + ' GU · coverage ' + lastReport.cov + '</p>';
   }
 
+  /* QC Sensor Diagnostics */
+  const QC_SENSORS = [
+    { id: 'glossmeter', name: 'Glossmeter', unit: 'GU', target: 92, range: [85, 98], icon: '◈' },
+    { id: 'spectro', name: 'Spectrophotometer ΔE', unit: 'ΔE', target: 0.8, range: [0.3, 1.5], icon: '◉' },
+    { id: 'hydro', name: 'Hydrophobicity', unit: '°', target: 108, range: [95, 115], icon: '◆' },
+    { id: 'thickness', name: 'SiO₂ Thickness', unit: 'nm', target: 120, range: [90, 150], icon: '▣' },
+    { id: 'roughness', name: 'Surface Ra', unit: 'µm', target: 0.02, range: [0.01, 0.04], icon: '▤' }
+  ];
+  const sensorHistory = {};
+  QC_SENSORS.forEach(s => { sensorHistory[s.id] = []; });
+
+  function qcSensorsUpdate(dt) {
+    const progress = clamp(qcT / 3.0, 0, 1);
+    QC_SENSORS.forEach(s => {
+      const el = $('qcSensor_' + s.id);
+      if (!el) return;
+      const valEl = el.querySelector('.qs-val');
+      const statusEl = el.querySelector('.qs-status');
+      const sparkCanvas = el.querySelector('.qs-spark');
+      if (!valEl) return;
+
+      const noise = Math.sin(T * 4.5 + QC_SENSORS.indexOf(s) * 2.1) * 0.02 * (s.range[1] - s.range[0]);
+      const rawVal = lerp(s.range[0], s.target, ease(progress)) + noise;
+      const val = s.id === 'spectro' || s.id === 'roughness' ? rawVal.toFixed(2) : rawVal.toFixed(1);
+      valEl.textContent = progress > 0.05 ? val + ' ' + s.unit : '— ' + s.unit;
+
+      if (statusEl) {
+        const pass = s.id === 'spectro' ? rawVal <= 1.2 : (s.id === 'roughness' ? rawVal <= 0.035 : rawVal >= s.target * 0.9);
+        statusEl.textContent = progress < 0.3 ? 'SCANNING' : (pass ? 'PASS' : 'WARN');
+        statusEl.className = 'qs-status ' + (progress < 0.3 ? 'scanning' : (pass ? 'pass' : 'warn'));
+      }
+
+      /* spark line */
+      if (sparkCanvas && progress > 0.05) {
+        const hist = sensorHistory[s.id];
+        hist.push(rawVal);
+        if (hist.length > 40) hist.shift();
+        const ctx = sparkCanvas.getContext('2d');
+        ctx.clearRect(0, 0, sparkCanvas.width, sparkCanvas.height);
+        const min = s.range[0] * 0.95, max = s.range[1] * 1.05;
+        ctx.strokeStyle = '#06B6D4';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        hist.forEach((v, i) => {
+          const x = (i / 39) * sparkCanvas.width;
+          const y = sparkCanvas.height - ((v - min) / (max - min)) * sparkCanvas.height;
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        /* target line */
+        ctx.strokeStyle = 'rgba(46,229,157,0.3)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        const ty = sparkCanvas.height - ((s.target - min) / (max - min)) * sparkCanvas.height;
+        ctx.beginPath(); ctx.moveTo(0, ty); ctx.lineTo(sparkCanvas.width, ty); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    });
+  }
+
   /* scan demo */
   const gridOv = $('gridOv'); const gridCells = [];
   function buildGrid() {
@@ -2212,7 +2331,8 @@ function APP() {
     const rows = $('maintRows');
     const items = [
       ['Textile array', 82, '124 h'], ['Ionizer bars', 91, '210 h'], ['Mist nozzles', 74, '88 h'],
-      ['Air-knife blowers', 88, '156 h'], ['Scan cameras', 95, '40 h'], ['Gloss applicator', 79, '67 h']
+      ['Air-knife blowers', 88, '156 h'], ['Scan cameras', 95, '40 h'], ['Gloss applicator', 79, '67 h'],
+      ['Underbody jets', 86, '140 h']
     ];
     items.forEach(([n, p, h]) => {
       const d = document.createElement('div'); d.className = 'row';
@@ -2223,7 +2343,7 @@ function APP() {
 
   /* keyboard */
   addEventListener('keydown', e => {
-    if (e.target instanceof Element && e.target.matches('input,textarea,select,button')) return;
+    if (e.target.matches('input,textarea')) return;
     if (e.code === 'Space') { e.preventDefault(); if (flow === 'idle') startFlow(); else togglePause(); }
     if (e.key === 'r' || e.key === 'R') resetFlow();
     if (e.key === 'e' || e.key === 'E') $('engTog').click();
@@ -2238,20 +2358,11 @@ function APP() {
   if (location.hash) { const p = location.hash.slice(1); if (document.querySelector('[data-page="' + p + '"]')) setPage(p); }
 
   /* ---------- main update ---------- */
-  const ZONE_R = 3.1; /* half-width of a station's active zone (stations are 5 apart) */
-  /* proximity envelope: 1 at the station centre, ramps to 0 at ±ZONE_R — each equipment
-     only performs while the car is passing its own section, then stops. */
-  function zoneAmt(k) {
-    if (soloMod) return soloMod === k ? 1 : 0;
-    if (mode === 'manual') return manualOn[k] ? 1 : 0;
-    if (!hero || flow !== 'inportal') return 0;
-    const st = STATIONS[k]; if (!st) return 0;
-    return clamp(1 - Math.abs(hero.position.x - st.x) / ZONE_R, 0, 1);
-  }
-  function moduleActive(k) {
+  function moduleActive(k, tc) {
     if (soloMod) return soloMod === k;
     if (mode === 'manual' && manualOn[k]) return true;
-    return zoneAmt(k) > 0.03;
+    const m = MODS.find(x => x.k === k);
+    return tc >= m.s && tc <= m.e;
   }
   function cleanNow() {
     if (!hero) return 0;
@@ -2269,7 +2380,7 @@ function APP() {
     $('narr').style.opacity = introOn ? '0' : '1';
 
     const beltOn = convRun && !paused && !estop && (flow === 'queueAdv' || flow === 'entry' || flow === 'exit' || flow === 'qc' || flow === 'inportal' || conveyorForced);
-    if (beltOn) beltStrips.forEach(s => { s.position.x += dt * BELT * convSpd * convDir; if (s.position.x > 32) s.position.x = -34; if (s.position.x < -34) s.position.x = 32; });
+    if (beltOn) beltStrips.forEach(s => { s.position.x += dt * 2.4 * convSpd * convDir; if (s.position.x > 32) s.position.x = -34; if (s.position.x < -34) s.position.x = 32; });
     [-9.0, -4.0, 1.0, 6.0, 11.0, 16.0].forEach((sx, idx) => {
       if (proxSensors[idx] && hero) {
         const near = Math.abs(hero.position.x - sx) < 2.5;
@@ -2304,11 +2415,11 @@ function APP() {
         }
       } else if (flow === 'entry') {
         flowT += dt;
-        hero.position.x += dt * BELT * convSpd;
+        hero.position.x += dt * 2.8 * convSpd;
         curtains.forEach(c => c.material.opacity = 0.35);
         fireLogOnce('entry', 'Vehicle at portal threshold', 'info');
-        setNarr('ENTRY', '#2EE59D', 'Conveyor: transport, not process', 'The car rides the conveyor into the portal. All processing happens inside — six modules, one 22.6-second overlapped cycle.', '#2EE59D');
-        if (hero.position.x >= LANE.portalIn) { flow = 'inportal'; cycleT = 0; wantSnap = 'before'; qcTargets = [99.4, 99.0, 99.2, 99.1, 98.6, 98.3]; QZONES.forEach((_, i) => { if ($('zf' + i)) { $('zf' + i).style.width = '0'; $('zv' + i).textContent = '—'; } }); log('Scan initiated', 'ok'); }
+        setNarr('ENTRY', '#2EE59D', 'Conveyor: transport, not process', 'The car rides the conveyor into the portal. All processing happens inside — seven modules, one 22.6-second overlapped cycle.', '#2EE59D');
+        if (hero.position.x >= LANE.portalIn) { flow = 'inportal'; cycleT = 0; wantSnap = 'before'; log('Scan initiated', 'ok'); }
       } else if (flow === 'inportal') {
         if (soloMod) {
           soloTimer += dt;
@@ -2331,8 +2442,8 @@ function APP() {
                 nextSoloModule();
               } else {
                 stopSolo();
-                log('6-Module Step sequence finished', 'ok');
-                setNarr('6 MODULES COMPLETE', '#2EE59D', 'All 6 Cleaning Modules Finished', 'Each module was executed independently. Press START to run the 22.6s parallel cycle.', '#2EE59D');
+                log('7-Module Step sequence finished', 'ok');
+                setNarr('7 MODULES COMPLETE', '#2EE59D', 'All 7 Cleaning Modules Finished', 'Each module was executed independently. Press START to run the 22.6s parallel cycle.', '#2EE59D');
               }
             } else {
               soloTimer = 0;
@@ -2340,53 +2451,31 @@ function APP() {
           }
         } else {
           cycleT += dt;
-          /* car glides continuously through the portal over the full cycle */
+          /* crawl through portal */
           const u = clamp(cycleT / CYCLE, 0, 1);
           hero.position.x = lerp(LANE.portalIn, LANE.portalOut, u);
-          hero.position.z = 0;
           MODS.forEach(m => {
             if (cycleT >= m.s && cycleT < m.s + dt + 0.02) {
               fireLogOnce('m' + m.k, m.nm + ' activated', 'ok');
               fireSfx(m.k);
             }
           });
-          /* live QC fill — each panel score rises as the cleaning field reaches it (staggered) */
-          QZONES.forEach((z, i) => {
-            const uu = clamp((cycleT - (3.2 + i * 2.1)) / 4.5, 0, 1);
-            const zf = $('zf' + i), zv = $('zv' + i);
-            if (zf) { zf.style.width = (uu * 100) + '%'; zv.textContent = uu > 0.03 ? Math.round(uu * qcTargets[i]) : '—'; }
-          });
-          const tcq = $('tCqs'); if (tcq) tcq.textContent = cycleT > 4 ? Math.round(clamp((cycleT - 4) / 15, 0, 1) * 100) : '—';
-          const tcv = $('tCov'); if (tcv) tcv.textContent = Math.round(clamp(cycleT / CYCLE, 0, 1) * 98.5) + '%';
           if (cycleT >= CYCLE) {
             flow = 'exit'; flowT = 0; carsToday++; if (hubStore[currentHub]) hubStore[currentHub].cars = carsToday; waterToday += 118;
             fireSfx('complete');
             if ($('baPct')) setBa(true);
             cqsHist.push(100 + rnd(0, 2.4));
             $('stCount').textContent = pad(carsToday, 3);
-            /* live-ify Ops (modelled): polymer drains, queue drifts, shift/processed climb */
-            (function () {
-              var poly = $('alPoly');
-              if (poly) { var ps = poly.querySelector('span'); var pv = Math.max(6, (parseInt(ps.textContent) || 18) - 2);
-                ps.textContent = 'Reserve ' + pv + '% · ' + (pv < 12 ? 'reorder now' : 'reorder this shift'); }
-              var q = $('opsQ'); if (q) q.textContent = Math.max(0, (parseInt(q.textContent) || 4) - 1 + (Math.random() < 0.5 ? 1 : 0));
-              var sh = $('opsShift'); if (sh) sh.textContent = (parseInt(sh.textContent) || 127) + 1;
-              var pr = $('opsProc'); if (pr) pr.textContent = carsToday;
-            })();
-            /* lock QC bars to their final panel scores */
-            QZONES.forEach((z, i) => { if ($('zf' + i)) { $('zf' + i).style.width = qcTargets[i] + '%'; $('zv' + i).textContent = Math.round(qcTargets[i]); } });
-            if ($('tCqs')) $('tCqs').textContent = Math.round(100 + rnd(0, 2.4));
-            if ($('tCov')) $('tCov').textContent = '98.5%';
             lastReport = {
-              zones: qcTargets.slice(),
-              cqs: 101,
-              gloss: 94,
-              cov: '98.5%'
+              zones: QZONES.map(() => 98 + Math.random() * 2),
+              cqs: Math.round(100 + rnd(0, 2.4)),
+              gloss: 88 + Math.floor(Math.random() * 6),
+              cov: (96 + Math.random() * 3).toFixed(1) + '%'
             };
             $('dCov').textContent = lastReport.cov;
             $('dCont').textContent = '84% → 2%';
             $('dGloss').textContent = lastReport.gloss + ' GU';
-            $('dProt').textContent = '98.5%';
+            $('dProt').textContent = (92 + Math.random() * 6).toFixed(0) + '%';
             log('Cycle complete · 22.60 s', 'ok');
             if (presOn) {
               setTimeout(() => showQuote('The bottleneck was not speed. It was sequence.', 3200), 3600);
@@ -2396,10 +2485,13 @@ function APP() {
         }
       } else if (flow === 'exit') {
         flowT += dt;
-        hero.position.x += dt * BELT * convSpd;
+        hero.position.x += dt * 3.2 * convSpd;
         // As car glides past qcArch at 18.8:
         if (hero.position.x >= 18.0 && hero.position.x <= 19.8) {
           qcBeam.material.opacity = 0.35 + 0.15 * Math.sin(T * 8);
+          if (qcT === 0) qcBegin();
+          qcUpdate(dt);
+          qcSensorsUpdate(dt);
         } else {
           qcBeam.material.opacity = Math.max(0, qcBeam.material.opacity - dt * 2);
         }
@@ -2433,7 +2525,7 @@ function APP() {
     if (hero) {
       const dx = hero.position.x - (hero.userData.lastX || hero.position.x);
       hero.userData.lastX = hero.position.x;
-      const rot = dx / 0.47; /* true tyre outer radius: roll without slip */
+      const rot = dx / 0.34;
       hero.userData.wheels.forEach(w => {
         w.rotation.z -= rot;
         if (w.userData.sp) w.userData.sp.rotation.z -= rot;
@@ -2446,7 +2538,7 @@ function APP() {
     if (!inP && flow !== 'precycle' && wakeT < 0) {
       scanPlane.visible = false; scanBox.visible = false; glossRing.visible = false;
       roofArray.visible = false; sideArrays.forEach(sa => sa.g.visible = false);
-      airUnits.forEach(a => a.u.visible = false); mistCones.visible = false;
+      airUnits.forEach(a => a.u.visible = false); mistCones.visible = false; bottomJets.visible = false;
       ionBar.material.emissiveIntensity = 0;
       [P_ion, P_mist, P_air, P_spark].forEach(p => { if (flow !== 'precycle') p.pts.visible = false; });
       ionStreams.forEach(L => { L.line.visible = false; });
@@ -2502,20 +2594,20 @@ function APP() {
       const sOn = moduleActive('scan', tc);
       scanPlane.visible = sOn; scanBox.visible = sOn;
       if (sOn) {
-        scanPlane.position.set(cx - 2.2 + ((T * 0.7) % 1) * 4.4, 1.25, 0); scanBox.position.set(cx, 1.15, 0);
+        scanPlane.position.set(cx - 2.2 + seg(tc, 0, 1.9) * 4.4, 1.25, 0); scanBox.position.set(cx, 1.15, 0);
         heatPatches.forEach((p, i) => {
           const zn = [[0, 2.05, 0], [1.4, 1.35, 0], [0, 0.8, 0.9], [0, 0.8, -0.9], [-2.1, 0.85, 0], [0.6, 1.6, 0]][i];
           p.position.set(cx + zn[0], zn[1], zn[2]);
           if (i < 2 || i === 4) p.rotation.set(-Math.PI / 2, 0, 0); else p.rotation.set(0, i === 3 ? Math.PI : 0, 0);
-          p.material.opacity = zoneAmt('scan') * 0.35;
+          p.material.opacity = seg(tc, 0.3 + i * 0.11, 1.1 + i * 0.11) * 0.35;
         });
       } else heatPatches.forEach(p => p.material.opacity = Math.max(0, p.material.opacity - dt));
 
-      const ionI = (mode === 'manual' && manualOn.ion) ? 0.8 : zoneAmt('ion');
+      const ionI = moduleActive('ion', tc) ? tri(tc, 1.9, 4.7) || (mode === 'manual' ? 0.8 : 0) : 0;
       ionBar.material.emissiveIntensity = ionI * 0.75;
       if (activeFault && activeFault.id === 'tex') ionBar.material.emissiveIntensity *= 0.3;
 
-      const mistI = (mode === 'manual' && manualOn.mist) ? 0.7 : zoneAmt('mist');
+      const mistI = moduleActive('mist', tc) ? (tri(tc, 3.8, 7.5) || (mode === 'manual' ? 0.7 : 0)) : 0;
       mistCones.children.forEach((c, ci) => {
         const blocked = activeFault && activeFault.id === 'nozzle' && ci === 3;
         c.material.opacity = blocked ? 0 : mistI * 0.26;
@@ -2530,7 +2622,7 @@ function APP() {
       }
 
       const texOn = moduleActive('tex', tc);
-      const tIn = zoneAmt('tex'), tOut = 0;
+      const tIn = ease(seg(tc, 5.6, 6.8)), tOut = ease(seg(tc, 14.3, 15.5));
       roofArray.visible = texOn;
       if (texOn) {
         const tin = mode === 'manual' && manualOn.tex ? 1 : tIn;
@@ -2557,15 +2649,27 @@ function APP() {
         if (mat.uniforms && mat.uniforms.uWaveX) mat.uniforms.uWaveX.value = u;
       });
 
-      const airI = (mode === 'manual' && manualOn.air) ? 0.7 : zoneAmt('air');
+      const airI = moduleActive('air', tc) ? (tri(tc, 11.3, 18.8) || (mode === 'manual' ? 0.7 : 0)) : 0;
       airUnits.forEach(a => {
         a.u.visible = airI > 0.02; a.u.position.x = hero.position.x + a.zs * 1.0;
         a.sheet.material.opacity = airI * (0.28 + 0.18 * Math.abs(Math.sin(T * 11)));
       });
+      /* bottom cleaner jets */
+      const btmOn = moduleActive('bottom', tc);
+      const btmI = btmOn ? (tri(tc, 8.0, 14.5) || (mode === 'manual' ? 0.7 : 0)) : 0;
+      bottomJets.visible = btmI > 0.02;
+      if (bottomJets.visible) {
+        bottomJets.position.x = hero.position.x;
+        bottomJets.children.forEach((c, ci) => {
+          c.material.opacity = btmI * (0.25 + 0.15 * Math.abs(Math.sin(T * 9 + ci * 1.1)));
+          c.position.y = 0.5 + Math.sin(T * 7 + ci * 0.8) * 0.15;
+          c.scale.y = 0.8 + Math.sin(T * 12 + ci) * 0.2;
+        });
+      }
       const gOn = moduleActive('gloss', tc);
-      const gI = zoneAmt('gloss');
+      const gI = gOn ? seg(tc, 19.5, 22.6) : 0;
       glossRing.visible = gOn;
-      if (glossRing.visible) { glossRing.position.set(hero.position.x - 2.1 + gI * 4.2, 1.2, 0); glossRing.material.opacity = 0.4 * zoneAmt('gloss') + 0.15; }
+      if (glossRing.visible) { glossRing.position.set(hero.position.x - 2.1 + gI * 4.2, 1.2, 0); glossRing.material.opacity = 0.4 * (tri(tc, 19.5, 22.6) || 0.4) + 0.15; }
       if (window.SRP && SRP.tickCloud) {
         SRP.tickCloud(P_ion, dt, ionI, 'ion', { x: cx }, T, lofx);
         SRP.tickCloud(P_mist, dt, mistI, 'mist', { x: cx }, T, lofx);
@@ -2634,7 +2738,7 @@ function APP() {
     } else gph.style.opacity = 0;
     $('gpct').textContent = inP ? Math.round(tc / CYCLE * 100) + '%' : '0%';
     if ($('fvTime')) $('fvTime').textContent = inP ? fmtT(cycleT) : '00.00';
-    if ($('fvActive')) $('fvActive').textContent = activeMods.length + ' / 6 live';
+    if ($('fvActive')) $('fvActive').textContent = activeMods.length + ' / 7 live';
     MODS.forEach(m => {
       const lane = $('fv_' + m.k);
       if (lane) lane.classList.toggle('on', inP && moduleActive(m.k, tc));
@@ -2653,6 +2757,7 @@ function APP() {
       if (moduleActive('mist', tc)) bloomStr = Math.max(bloomStr, 0.12);
       if (moduleActive('tex', tc)) bloomStr = Math.max(bloomStr, 0.18);
       if (moduleActive('air', tc)) bloomStr = Math.max(bloomStr, 0.12);
+      if (moduleActive('bottom', tc)) bloomStr = Math.max(bloomStr, 0.13);
       if (moduleActive('gloss', tc)) bloomStr = Math.max(bloomStr, 0.16);
     } else if (wakeT >= 0) bloomStr = 0.14;
     if ($('opsQ')) $('opsQ').textContent = String(queueCars.length);
@@ -2679,18 +2784,19 @@ function APP() {
     if (fill) fill.style.transform = 'scaleX(' + (inP ? tc / CYCLE : 0) + ')';
     if (inP && activeMods.length) {
       const a = activeMods[activeMods.length - 1];
-      setNarr('MODULE ' + pad(MODS.indexOf(a) + 1, 2) + '/06', a.col, a.nm, a.ds, a.col);
+      setNarr('MODULE ' + pad(MODS.indexOf(a) + 1, 2) + '/07', a.col, a.nm, a.ds, a.col);
     }
 
     /* sensors */
     const dirt = hero ? cleanNow() : 0;
-    const zones = ['HOOD', 'ROOF', 'LEFT', 'RIGHT', 'REAR', 'GLASS', 'MIRRORS'];
+    const zones = ['HOOD', 'ROOF', 'LEFT', 'RIGHT', 'REAR', 'GLASS', 'MIRRORS', 'BOTTOM'];
     zones.forEach(z => {
       const el = $('sz' + z); if (!el) return;
       el.setAttribute('class', 'sz');
       if (!hero) return;
       if (inP && moduleActive('scan', tc)) el.classList.add('DETECTED');
       else if (inP && moduleActive('tex', tc)) el.classList.add('ACTIVE');
+      else if (z === 'BOTTOM' && inP && moduleActive('bottom', tc)) el.classList.add('ACTIVE');
       else if (dirt > 0.7) el.classList.add('CLEAR');
       else el.classList.add('DIRTY');
     });
@@ -2700,14 +2806,14 @@ function APP() {
     $('tSpd').textContent = spd.toFixed(2) + ' m/s';
     $('tCyc').textContent = fmtT(inP ? cycleT : 0) + ' s';
     $('tAir').textContent = (inP && moduleActive('ion', tc)) || (inP && moduleActive('air', tc)) ? (18 + Math.sin(T * 3) * 2).toFixed(1) + ' m/s est.' : '—';
-    $('tMist').textContent = inP && moduleActive('mist') ? Math.round(zoneAmt('mist') * 100) + '%' : '0%';
-    $('tTex').textContent = inP && moduleActive('tex') ? Math.round(zoneAmt('tex') * 100) + '%' : '0%';
+    $('tMist').textContent = inP && moduleActive('mist', tc) ? Math.round(tri(tc, 4, 8) * 100) + '%' : '0%';
+    $('tTex').textContent = inP && moduleActive('tex', tc) ? Math.round(seg(tc, 6, 16) * 100) + '%' : '0%';
     $('tCov').textContent = Math.round(dirt * 100) + '%';
     $('tQ').textContent = String(queueCars.length);
     $('twPlc').textContent = $('stCycle').textContent;
     $('twSafe').textContent = flow === 'entry' || inP ? 'BEAM' : 'CLEAR';
     $('twConv').textContent = beltOn ? ('RUN ' + convSpd.toFixed(1) + '×') : 'STOPPED';
-    $('twAct').textContent = activeMods.length + ' / 6';
+    $('twAct').textContent = activeMods.length + ' / 7';
     if (camMode === 'fpv' || camMode === 'hood') {
       const dist = hero ? Math.max(0, LANE.done - hero.position.x).toFixed(1) : '—';
       $('camMeta').textContent = 'FPV · ' + spd.toFixed(2) + ' m/s · EXIT ' + dist + ' m · CYCLE ' + fmtT(inP ? cycleT : 0) + ' s';
@@ -2836,5 +2942,5 @@ function APP() {
   }
   const firstNav = document.querySelector('#nav .nv.on');
   if (firstNav && $('navInd')) $('navInd').style.transform = 'translateY(' + (firstNav.offsetTop + 10) + 'px)';
-  log('Hub environment loaded · 6 modules armed', 'ok');
+  log('Hub environment loaded · 7 modules armed', 'ok');
 }
